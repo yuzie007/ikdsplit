@@ -24,7 +24,7 @@ def run(args):
 
     df = pd.read_csv(f"../atoms_conventional.csv", skipinitialspace=True)
 
-    cell = (mapping["rotation"] @ cell.T).T
+    cell = (cell.T @ mapping["rotation"]).T
 
     np.savetxt("cell.dat", cell, fmt="%24.18f")
 
