@@ -1,10 +1,8 @@
-import itertools
 import string
 
 import numpy as np
 import pandas as pd
 import yaml
-from ase.spacegroup import crystal, get_spacegroup
 
 
 def format_df(df):
@@ -12,42 +10,6 @@ def format_df(df):
         if df[k].dtype == object:
             df[k] = df[k].str.pad(12)
     return df
-
-
-def make_atoms(df: pd.DataFrame, spacegroup: int, cell: np.ndarray):
-    n = len(df)
-
-    # hexagonal cell (consistent with Bilbao) for rhombohedral space groups
-    setting = 1 if (3 <= spacegroup <= 15 or 143 <= spacegroup <= 194) else 2
-
-    for included in itertools.product([True, False], repeat=n):
-        df_included = df[list(included)]
-        symbols = df_included["symbol"].str.strip().values
-        basis = df_included[["x", "y", "z"]]
-        if len(symbols) == 0:
-            return
-        try:
-            atoms = crystal(
-                symbols,
-                basis=basis,
-                spacegroup=spacegroup,
-                cell=cell,
-                setting=setting,
-            )
-        except Exception:
-            atoms = crystal(
-                symbols,
-                basis=basis,
-                spacegroup=spacegroup,
-                cell=cell,
-            )
-        spacegroup_actual = get_spacegroup(atoms).todict()["number"]
-        print(included, spacegroup_actual)
-        if spacegroup_actual == spacegroup:
-            break
-    else:
-        raise RuntimeError
-    atoms.write("POSCAR", direct=True)
 
 
 def add_arguments(parser):
@@ -59,9 +21,6 @@ def run(args):
 
     with open("wycksplit.yaml") as f:
         mapping = yaml.safe_load(f)
-
-    spacegroup_sup = mapping["space_group_number_sup"]
-    spacegroup_sub = mapping["space_group_number_sub"]
 
     df = pd.read_csv(f"../atoms_conventional.csv", skipinitialspace=True)
 
@@ -99,5 +58,3 @@ def run(args):
     df = format_df(df)
     filename = "atoms_conventional.csv"
     df.to_csv(filename, float_format="%24.18f", index=False)
-
-    make_atoms(df, spacegroup_sub, cell)

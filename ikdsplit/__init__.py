@@ -1,6 +1,8 @@
 """Module ikdtools"""
+
 import argparse
 
+import ikdsplit.atoms
 import ikdsplit.converter
 
 
@@ -12,6 +14,7 @@ def main():
 
     commands = {
         "convert": ikdsplit.converter,
+        "symmetry": ikdsplit.atoms,
     }
     for key, value in commands.items():
         value.add_arguments(subparsers.add_parser(key))
