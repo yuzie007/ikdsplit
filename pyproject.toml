@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ikdsplit"
+version = "0.1.0"
+authors = [
+    {name = "Yuji Ikeda"},
+]
+dependencies = [
+    "ase",
+    "spglib",
+]
+
+[project.scripts]
+ikdsplit = "ikdsplit.__init__:main"
+
+[tool.ruff.lint]
+select = ["ALL"]
