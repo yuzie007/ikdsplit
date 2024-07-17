@@ -1,8 +1,38 @@
 import ase.io
 import numpy as np
+from ase import Atoms
+
+
+def sort_atoms(atoms: Atoms, atoms_ref: Atoms) -> Atoms:
+    """Sort atoms.
+
+    Parameters
+    ----------
+    atoms : Atoms
+        Atoms to be sorted.
+    atoms_ref : Atoms
+        Atoms with the reference order.
+
+    """
+    tmp = []
+    for i in range(len(atoms)):
+        sp_ref = atoms.get_scaled_positions()[i]
+        diffs = atoms_ref.get_scaled_positions() - sp_ref
+        diffs -= np.round(diffs)
+        indices = np.where(np.all(np.abs(diffs) < 1e-12, axis=1))[0]
+        assert len(indices) in [0, 1]
+        if len(indices) == 1:
+            tmp.append(indices[0])
+    tmp = sorted(tmp)
+    return atoms_ref[tmp]
 
 
 def add_arguments(parser):
+    parser.add_argument(
+        "images",
+        nargs="+",
+        help="POSCAR files to be updated",
+    )
     parser.add_argument(
         "--ref",
         help="atoms with the reference order",
@@ -22,20 +52,9 @@ def run(args):
         _description_
 
     """
-    atoms = ase.io.read("SPOSCAR_regressed")
     atoms_ref = ase.io.read(args.ref)
-
-    tmp = []
-    for i in range(len(atoms)):
-        sp_ref = atoms.get_scaled_positions()[i]
-        diffs = atoms_ref.get_scaled_positions() - sp_ref
-        diffs -= np.round(diffs)
-        indices = np.where(np.all(np.abs(diffs) < 1e-12, axis=1))[0]
-        assert len(indices) in [0, 1]
-        if len(indices) == 1:
-            tmp.append(indices[0])
-    tmp = sorted(tmp)
-    atoms_sym = atoms_ref[tmp]
-    atoms_sym.write("SPOSCAR_symmetry", direct=True)
-    atoms_met = atoms_sym[[atom.index for atom in atoms if atom.symbol != "H"]]
-    atoms_met.write("SPOSCAR", direct=True)
+    for fin in args.images:
+        atoms = ase.io.read(fin)
+        atoms = sort_atoms(atoms, atoms_ref)
+        fout = fin.replace("RPOSCAR", "SPOSCAR")
+        atoms.write(fout, direct=True)

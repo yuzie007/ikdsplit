@@ -44,8 +44,6 @@ def regress(
     origin_shift_last: np.ndarray,
 ) -> Atoms:
     """Regress `Atoms` to the original unit cell."""
-    atoms = ase.io.read("POSCAR")
-
     fn = ""
     while True:
         fn = "wycksplit.yaml" if not fn else os.path.join("..", fn)
@@ -86,4 +84,4 @@ def run(args):
         print(fin)
         atoms = ase.io.read(fin)
         atoms = regress(atoms, basis_change, origin_shift)
-        atoms.write(f"S{fin}", direct=True)
+        atoms.write(f"R{fin}", direct=True)
