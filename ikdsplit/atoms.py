@@ -35,6 +35,8 @@ def make_images(df: pd.DataFrame, spacegroup: int, cell: np.ndarray):
 
     for included in itertools.product([True, False], repeat=n):
         df_included = df[list(included)]
+        if len(df_included) == 0:
+            return
         atoms = make_atoms(df_included, spacegroup, cell)
         spacegroup_actual = get_spacegroup(atoms).todict()["number"]
         print(included, spacegroup_actual)
