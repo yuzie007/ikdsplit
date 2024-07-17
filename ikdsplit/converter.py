@@ -4,12 +4,7 @@ import numpy as np
 import pandas as pd
 import yaml
 
-
-def format_df(df):
-    for k in df.columns:
-        if df[k].dtype == object:
-            df[k] = df[k].str.pad(12)
-    return df
+from ikdsplit.utils import format_df
 
 
 def add_arguments(parser):

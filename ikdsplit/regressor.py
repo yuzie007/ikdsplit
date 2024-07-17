@@ -1,3 +1,4 @@
+import functools
 import os
 
 import ase.io
@@ -6,6 +7,8 @@ import pandas as pd
 import yaml
 from ase import Atoms
 from ase.build import make_supercell
+
+from ikdsplit.utils import format_df
 
 
 def change_coordinates(
@@ -38,12 +41,27 @@ def invert(
     return inv_basis_change, inv_origin_shift
 
 
-def regress(
-    atoms: Atoms,
+def multiply(
+    op0: tuple[np.ndarray, np.ndarray],
+    op1: tuple[np.ndarray, np.ndarray],
+) -> tuple[np.ndarray, np.ndarray]:
+    """Multiply two changes of the coordinate system.
+
+    See Sec. (1.2.2.2) in ITA (2016).
+    """
+    basis_change_0, origin_shift_0 = op0
+    basis_change_1, origin_shift_1 = op1
+    basis_change = basis_change_1 @ basis_change_0
+    origin_shift = basis_change_1 @ origin_shift_0 + origin_shift_1
+    return basis_change, origin_shift
+
+
+def cumulate_coordinate_change(
     basis_change_last: np.ndarray,
     origin_shift_last: np.ndarray,
-) -> Atoms:
-    """Regress `Atoms` to the original unit cell."""
+) -> tuple[np.ndarray, np.ndarray]:
+    """Cumulate changes of the coordinate system."""
+    ops = []
     fn = ""
     while True:
         fn = "wycksplit.yaml" if not fn else os.path.join("..", fn)
@@ -51,10 +69,9 @@ def regress(
             break
         with open(fn, encoding="utf-8") as f:
             d = yaml.safe_load(f)
-        basis_change, origin_shift = invert(d["rotation"], d["translation"])
-        atoms = change_coordinates(atoms, basis_change, origin_shift)
-
-    return change_coordinates(atoms, basis_change_last, origin_shift_last)
+        ops.append(invert(d["rotation"], d["translation"]))
+    ops.append((basis_change_last, origin_shift_last))
+    return functools.reduce(multiply, ops)
 
 
 def add_arguments(parser):
@@ -78,10 +95,20 @@ def add_arguments(parser):
 
 
 def run(args):
-    basis_change = np.array(args.rotation).reshape(3, 3)
-    origin_shift = np.array(args.translation)
+    basis_change_last = np.array(args.rotation).reshape(3, 3)
+    origin_shift_last = np.array(args.translation)
+    basis_change, origin_shift = cumulate_coordinate_change(
+        basis_change_last,
+        origin_shift_last,
+    )
     for fin in args.images:
         print(fin)
         atoms = ase.io.read(fin)
-        atoms = regress(atoms, basis_change, origin_shift)
+        atoms = change_coordinates(atoms, basis_change, origin_shift)
         atoms.write(f"R{fin}", direct=True)
+
+    df = pd.read_csv("atoms_conventional.csv", skipinitialspace=True)
+    df[["x", "y", "z"]] -= origin_shift
+    df[["x", "y", "z"]] @= basis_change.T
+    df = format_df(df)
+    df.to_csv("atoms_regressed.csv", float_format="%24.18f", index=False)
