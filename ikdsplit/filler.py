@@ -9,7 +9,7 @@ from ase import Atoms
 
 def add_labels(df: pd.DataFrame) -> pd.DataFrame:
     tmp = df.groupby(["symbol", "wyckoff"]).cumcount() + 1
-    df["label"] = df["wyckoff"] + tmp.astype(str)
+    df["label"] = df["symbol"] + "_" + df["wyckoff"] + tmp.astype(str)
     return df
 
 
@@ -43,6 +43,7 @@ def make_images(
     cell: np.ndarray,
     choices: list[list[bool]],
 ) -> list[Atoms]:
+    symbols = df["symbol"].unique()
     images = []
     ds = []
     i = -1
@@ -54,6 +55,7 @@ def make_images(
         d = {}
         d["index"] = i
         d["space_group_number"] = get_spacegroup(atoms).todict()["number"]
+        d.update({symbol: atoms.symbols.count(symbol) for symbol in symbols})
         d.update(dict(zip(df["label"], included, strict=True)))
         ds.append(d)
 
@@ -67,7 +69,6 @@ def make_choices(
     selected: list[str],
 ) -> list[list[bool]]:
     choices = []
-    print(df)
     for _, row in df.iterrows():
         if row["symbol"] in always:
             choices.append([True])
@@ -120,4 +121,4 @@ def run(args):
         fn = f"POSCAR-{i:09d}"
         atoms.write(fn, direct=True)
 
-    df_tmp.to_csv("info.csv", index=False)
+    df_tmp.to_csv("info_conventional.csv", index=False)
