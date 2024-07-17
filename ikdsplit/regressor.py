@@ -15,20 +15,39 @@ def format_df(df):
     return df
 
 
-def modify_atoms(
+def change_coordinates(
     atoms: Atoms,
     df: pd.DataFrame,
-    rotation: np.ndarray,
-    translation: np.ndarray,
-):
-    supercell_matrix = np.linalg.inv(rotation).T
-    atoms = make_supercell(atoms, supercell_matrix, order="atom-major")
-    atoms.set_scaled_positions(atoms.get_scaled_positions() + translation)
+    basis_change: np.ndarray,
+    origin_shift: np.ndarray,
+) -> tuple[Atoms, pd.DataFrame]:
+    """Change the coordinate system."""
+    atoms.set_scaled_positions(atoms.get_scaled_positions() - origin_shift)
+    atoms = make_supercell(atoms, basis_change.T, order="atom-major")
 
-    df[["x", "y", "z"]] @= np.array(rotation).T
-    df[["x", "y", "z"]] += translation
+    df[["x", "y", "z"]] -= origin_shift
+    df[["x", "y", "z"]] @= basis_change.T
 
     return atoms, df
+
+
+def invert(
+    basis_change: np.ndarray,
+    origin_shift: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Invert a general change of the coordinate system.
+
+    Parameters
+    ----------
+    basis_change : np.ndarray
+        P
+    origin_shift : np.ndarray
+        p
+
+    """
+    inv_basis_change = np.linalg.inv(basis_change)
+    inv_origin_shift = -1.0 * inv_basis_change @ origin_shift
+    return inv_basis_change, inv_origin_shift
 
 
 def add_arguments(parser):
@@ -50,31 +69,19 @@ def run(args):
     atoms = ase.io.read("POSCAR")
     df = pd.read_csv("atoms_conventional.csv", skipinitialspace=True)
 
-    filename = "wycksplit.yaml"
-    with open(filename) as f:
-        mapping = yaml.safe_load(f)
-    atoms, df = modify_atoms(
-        atoms,
-        df,
-        mapping["rotation"],
-        mapping["translation"],
-    )
+    fn = ""
     while True:
-        filename = os.path.join("..", filename)
-        if not os.path.isfile(filename):
+        fn = "wycksplit.yaml" if not fn else os.path.join("..", fn)
+        if not os.path.isfile(fn):
             break
-        with open(filename) as f:
-            mapping = yaml.safe_load(f)
-        atoms, df = modify_atoms(
-            atoms,
-            df,
-            mapping["rotation"],
-            mapping["translation"],
-        )
+        with open(fn) as f:
+            d = yaml.safe_load(f)
+        basis_change, origin_shift = invert(d["rotation"], d["translation"])
+        atoms, df = change_coordinates(atoms, df, basis_change, origin_shift)
 
-    rotation = np.array(args.rotation).reshape(3, 3)
-    translation = np.array(args.translation)
-    atoms, df = modify_atoms(atoms, df, rotation, translation)
+    basis_change = np.array(args.rotation).reshape(3, 3)
+    origin_shift = np.array(args.translation)
+    atoms, df = change_coordinates(atoms, df, basis_change, origin_shift)
 
     atoms.write("SPOSCAR_regressed", direct=True)
 
