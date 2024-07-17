@@ -4,6 +4,7 @@ import ase.io
 import numpy as np
 import pandas as pd
 import yaml
+from ase import Atoms
 from ase.build import make_supercell
 
 
@@ -14,10 +15,12 @@ def format_df(df):
     return df
 
 
-def modify_atoms(atoms, df, mapping):
-    rotation = mapping["rotation"]
-    translation = mapping["translation"]
-
+def modify_atoms(
+    atoms: Atoms,
+    df: pd.DataFrame,
+    rotation: np.ndarray,
+    translation: np.ndarray,
+):
     supercell_matrix = np.linalg.inv(rotation).T
     atoms = make_supercell(atoms, supercell_matrix, order="atom-major")
     atoms.set_scaled_positions(atoms.get_scaled_positions() + translation)
@@ -29,7 +32,18 @@ def modify_atoms(atoms, df, mapping):
 
 
 def add_arguments(parser):
-    pass
+    parser.add_argument(
+        "--rotation",
+        nargs=9,
+        default=[1, 0, 0, 0, 1, 0, 0, 0, 1],
+        type=int,
+    )
+    parser.add_argument(
+        "--translation",
+        nargs=3,
+        default=[0.0, 0.0, 0.0],
+        type=float,
+    )
 
 
 def run(args):
@@ -39,19 +53,28 @@ def run(args):
     filename = "wycksplit.yaml"
     with open(filename) as f:
         mapping = yaml.safe_load(f)
-    atoms, df = modify_atoms(atoms, df, mapping)
+    atoms, df = modify_atoms(
+        atoms,
+        df,
+        mapping["rotation"],
+        mapping["translation"],
+    )
     while True:
         filename = os.path.join("..", filename)
         if not os.path.isfile(filename):
             break
         with open(filename) as f:
             mapping = yaml.safe_load(f)
-        atoms, df = modify_atoms(atoms, df, mapping)
+        atoms, df = modify_atoms(
+            atoms,
+            df,
+            mapping["rotation"],
+            mapping["translation"],
+        )
 
-    mapping = {}
-    mapping["rotation"] = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
-    mapping["translation"] = [0.125, 0.125, 0.125]  # setting 1 -> 2
-    atoms, df = modify_atoms(atoms, df, mapping)
+    rotation = np.array(args.rotation).reshape(3, 3)
+    translation = np.array(args.translation)
+    atoms, df = modify_atoms(atoms, df, rotation, translation)
 
     atoms.write("SPOSCAR_regressed", direct=True)
 
