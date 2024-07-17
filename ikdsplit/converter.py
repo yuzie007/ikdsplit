@@ -14,10 +14,10 @@ def add_arguments(parser):
 def run(args):
     cell = np.loadtxt("../cell.dat")
 
-    with open("wycksplit.yaml") as f:
+    with open("wycksplit.yaml", encoding="utf-8") as f:
         mapping = yaml.safe_load(f)
 
-    df = pd.read_csv(f"../atoms_conventional.csv", skipinitialspace=True)
+    df = pd.read_csv("../atoms_conventional.csv", skipinitialspace=True)
 
     cell = (cell.T @ mapping["rotation"]).T
 
@@ -34,7 +34,7 @@ def run(args):
             wyckoffs_orig.append(s["wyckoff"])
 
             # representative for split wyckoff sites
-            xyz = s[["x", "y", "z"]].values.astype(float)
+            xyz = s[["x", "y", "z"]].to_numpy(float)
             basis.append(d["rotation"] @ xyz + d["translation"])
 
     basis = np.array(basis) - mapping["translation"]
