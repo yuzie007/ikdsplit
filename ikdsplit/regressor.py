@@ -1,4 +1,3 @@
-import itertools
 import os
 
 import ase.io
@@ -19,7 +18,8 @@ def modify_atoms(atoms, df, mapping):
     rotation = mapping["rotation"]
     translation = mapping["translation"]
 
-    atoms = make_supercell(atoms, np.linalg.inv(rotation).T, order='atom-major')
+    supercell_matrix = np.linalg.inv(rotation).T
+    atoms = make_supercell(atoms, supercell_matrix, order="atom-major")
     atoms.set_scaled_positions(atoms.get_scaled_positions() + translation)
 
     df[["x", "y", "z"]] @= np.array(rotation).T
@@ -49,11 +49,11 @@ def run(args):
         atoms, df = modify_atoms(atoms, df, mapping)
 
     mapping = {}
-    mapping['rotation'] = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
-    mapping['translation'] = [0.125, 0.125, 0.125]  # setting 1 -> 2
+    mapping["rotation"] = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+    mapping["translation"] = [0.125, 0.125, 0.125]  # setting 1 -> 2
     atoms, df = modify_atoms(atoms, df, mapping)
 
-    atoms.write("SPOSCAR_ref", direct=True)
+    atoms.write("SPOSCAR_regressed", direct=True)
 
     df = format_df(df)
-    df.to_csv("atoms_ref.csv", float_format="%24.18f", index=False)
+    df.to_csv("atoms_regressed.csv", float_format="%24.18f", index=False)

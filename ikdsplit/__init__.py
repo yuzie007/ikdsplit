@@ -5,6 +5,7 @@ import argparse
 import ikdsplit.atoms
 import ikdsplit.converter
 import ikdsplit.regressor
+import ikdsplit.sorter
 
 
 def main():
@@ -17,6 +18,7 @@ def main():
         "symmetry": ikdsplit.atoms,
         "convert": ikdsplit.converter,
         "regress": ikdsplit.regressor,
+        "sort": ikdsplit.sorter,
     }
     for key, value in commands.items():
         value.add_arguments(subparsers.add_parser(key))
