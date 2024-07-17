@@ -76,11 +76,6 @@ def cumulate_coordinate_change(
 
 def add_arguments(parser):
     parser.add_argument(
-        "images",
-        nargs="+",
-        help="POSCAR files to be updated",
-    )
-    parser.add_argument(
         "--rotation",
         nargs=9,
         default=[1, 0, 0, 0, 1, 0, 0, 0, 1],
@@ -101,14 +96,24 @@ def run(args):
         basis_change_last,
         origin_shift_last,
     )
-    for fin in args.images:
-        print(fin)
-        atoms = ase.io.read(fin)
-        atoms = change_coordinates(atoms, basis_change, origin_shift)
-        atoms.write(f"R{fin}", direct=True)
 
     df = pd.read_csv("atoms_conventional.csv", skipinitialspace=True)
+    symbols = df["symbol"].unique()
     df[["x", "y", "z"]] -= origin_shift
     df[["x", "y", "z"]] @= basis_change.T
     df = format_df(df)
     df.to_csv("atoms_regressed.csv", float_format="%24.18f", index=False)
+
+    df = pd.read_csv("info_conventional.csv", skipinitialspace=True)
+    ds = []
+    for d in df.to_dict(orient="records"):
+        index = d["index"]
+        fin = f"POSCAR-{index:09d}"
+        fout = f"RPOSCAR-{index:09d}"
+        atoms = ase.io.read(fin)
+        atoms = change_coordinates(atoms, basis_change, origin_shift)
+        atoms.write(fout, direct=True)
+        d.update({symbol: atoms.symbols.count(symbol) for symbol in symbols})
+        ds.append(d)
+    df = pd.DataFrame(ds)
+    df.to_csv("info_regressed.csv", index=False)
