@@ -1,0 +1,15 @@
+space_group_number_sup: 4
+space_group_number_sub: 1
+rotation:
+- [ 1.0,  0.0,  0.0]
+- [ 0.0,  1.0,  0.0]
+- [ 0.0,  0.0,  1.0]
+translation: [ 0.00000,  0.00000,  0.00000]
+wycksplit:
+  2a:
+    1a1:
+      rotation: [[ 1,  0,  0], [ 0,  1,  0], [ 0,  0,  1]]
+      translation: [ 0.00000,  0.00000,  0.00000]
+    1a2:
+      rotation: [[-1,  0,  0], [ 0,  1,  0], [ 0,  0, -1]]
+      translation: [ 0.00000,  0.50000,  0.00000]
