@@ -1,5 +1,6 @@
 import ase.io
 import numpy as np
+import pandas as pd
 from ase import Atoms
 
 
@@ -14,12 +15,13 @@ def sort_atoms(atoms: Atoms, atoms_ref: Atoms) -> Atoms:
         Atoms with the reference order.
 
     """
+    symprec = 1e-12
     tmp = []
     for i in range(len(atoms)):
         sp_ref = atoms.get_scaled_positions()[i]
         diffs = atoms_ref.get_scaled_positions() - sp_ref
         diffs -= np.round(diffs)
-        indices = np.where(np.all(np.abs(diffs) < 1e-12, axis=1))[0]
+        indices = np.where(np.all(np.abs(diffs) < symprec, axis=1))[0]
         assert len(indices) in [0, 1]
         if len(indices) == 1:
             tmp.append(indices[0])
@@ -28,11 +30,6 @@ def sort_atoms(atoms: Atoms, atoms_ref: Atoms) -> Atoms:
 
 
 def add_arguments(parser):
-    parser.add_argument(
-        "images",
-        nargs="+",
-        help="POSCAR files to be updated",
-    )
     parser.add_argument(
         "--ref",
         help="atoms with the reference order",
@@ -53,8 +50,11 @@ def run(args):
 
     """
     atoms_ref = ase.io.read(args.ref)
-    for fin in args.images:
+    df = pd.read_csv("info_conventional.csv", skipinitialspace=True)
+    for d in df.to_dict(orient="records"):
+        index = d["index"]
+        fin = f"RPOSCAR-{index:09d}"
+        fout = f"SPOSCAR-{index:09d}"
         atoms = ase.io.read(fin)
         atoms = sort_atoms(atoms, atoms_ref)
-        fout = fin.replace("RPOSCAR", "SPOSCAR")
         atoms.write(fout, direct=True)
