@@ -25,11 +25,12 @@ def sort_atoms(atoms: Atoms, atoms_ref: Atoms) -> Atoms:
         assert len(indices) in [0, 1]
         if len(indices) == 1:
             tmp.append(indices[0])
+    assert len(tmp) == len(atoms)
     tmp = sorted(tmp)
     return atoms_ref[tmp]
 
 
-def sort_all(ref: str):
+def sort_all(reference: str):
     """Sort atoms in the order in the reference file.
 
     Only `scaled_positions` are referred to, and `cell` is kept.
@@ -42,7 +43,7 @@ def sort_all(ref: str):
         Atoms with the reference positions.
 
     """
-    atoms_ref = ase.io.read(ref)
+    atoms_ref = ase.io.read(reference)
     df = pd.read_csv("info_conventional.csv", skipinitialspace=True)
     for d in df.to_dict(orient="records"):
         index = d["index"]
@@ -55,10 +56,10 @@ def sort_all(ref: str):
 
 def add_arguments(parser):
     parser.add_argument(
-        "--ref",
-        help="atoms with the reference order",
+        "--reference",
+        help="reference atoms with the reference order",
     )
 
 
 def run(args):
-    sort_all(args.ref)
+    sort_all(args.reference)

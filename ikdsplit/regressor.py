@@ -91,12 +91,12 @@ def cumulate_coordinate_change(
             d = yaml.safe_load(f)
         ops.append(invert(d["basis_change"], d["origin_shift"]))
 
-    if transformations is not None:
-        with open(transformations, encoding="utf-8") as f:
-            ops_last = yaml.safe_load(f)
-        ops_last = [[np.array(_) for _ in op] for op in ops_last]
-
-    ops.extend(ops_last)
+    if transformations:
+        ops_last = [
+            (np.array(_["basis_change"]), np.array(_["origin_shift"]))
+            for _ in transformations
+        ]
+        ops.extend(ops_last)
 
     return functools.reduce(multiply, ops)
 
