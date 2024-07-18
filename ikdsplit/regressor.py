@@ -7,8 +7,21 @@ import pandas as pd
 import yaml
 from ase import Atoms
 from ase.build import make_supercell
+from ase.spacegroup.crystal_data import _lattice_centering
 
 from ikdsplit.utils import format_df
+
+
+def get_p2c(spacegroup: int) -> np.ndarray:
+    """Get basis change from primitive to conventional."""
+    centering = _lattice_centering[spacegroup]
+    p2c = {
+        "P": np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]]),
+        "F": np.array([[-1, 1, 1], [1, -1, 1], [1, 1, -1]]),
+        "I": np.array([[0, 1, 1], [1, 0, 1], [1, 1, 0]]),
+        "R": np.array([[1, 0, 1], [-1, 1, 1], [0, -1, 1]]),
+    }[centering]
+    return np.array(p2c)
 
 
 def change_coordinates(
@@ -56,9 +69,19 @@ def multiply(
     return basis_change, origin_shift
 
 
-def cumulate_coordinate_change(ops_last) -> tuple[np.ndarray, np.ndarray]:
+def cumulate_coordinate_change(
+    transformations: list,
+) -> tuple[np.ndarray, np.ndarray]:
     """Cumulate changes of the coordinate system in the application order."""
     ops = []
+
+    if os.path.isfile("wycksplit.yaml"):
+        with open("wycksplit.yaml", encoding="utf-8") as f:
+            d = yaml.safe_load(f)
+        basis_change_first = get_p2c(d["space_group_number_sub"])
+        origin_shift_first = np.array([0.0, 0.0, 0.0])
+        ops.append((basis_change_first, origin_shift_first))
+
     fn = ""
     while True:
         fn = "wycksplit.yaml" if not fn else os.path.join("..", fn)
@@ -67,7 +90,14 @@ def cumulate_coordinate_change(ops_last) -> tuple[np.ndarray, np.ndarray]:
         with open(fn, encoding="utf-8") as f:
             d = yaml.safe_load(f)
         ops.append(invert(d["rotation"], d["translation"]))
+
+    if transformations is not None:
+        with open(transformations, encoding="utf-8") as f:
+            ops_last = yaml.safe_load(f)
+        ops_last = [[np.array(_) for _ in op] for op in ops_last]
+
     ops.extend(ops_last)
+
     return functools.reduce(multiply, ops)
 
 
@@ -76,12 +106,8 @@ def add_arguments(parser):
 
 
 def run(args):
-    ops = []
-    if args.transformations is not None:
-        with open(args.transformations, encoding="utf-8") as f:
-            ops = yaml.safe_load(f)
-        ops = [[np.array(_) for _ in op] for op in ops]
-    basis_change, origin_shift = cumulate_coordinate_change(ops)
+    transformations = args.transformations
+    basis_change, origin_shift = cumulate_coordinate_change(transformations)
 
     # calculate atomic positions in the target supercell
     df = pd.read_csv("atoms_conventional.csv", skipinitialspace=True)
@@ -95,7 +121,7 @@ def run(args):
     ds = []
     for d in df.to_dict(orient="records"):
         index = d["index"]
-        fin = f"POSCAR-{index:09d}"
+        fin = f"PPOSCAR-{index:09d}"
         fout = f"RPOSCAR-{index:09d}"
         atoms = ase.io.read(fin)
         atoms = change_coordinates(atoms, basis_change, origin_shift)
