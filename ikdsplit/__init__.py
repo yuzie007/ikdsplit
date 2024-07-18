@@ -4,6 +4,7 @@ import argparse
 
 import ikdsplit.converter
 import ikdsplit.filler
+import ikdsplit.preparer
 import ikdsplit.regressor
 import ikdsplit.sorter
 
@@ -15,6 +16,7 @@ def main():
     subparsers = parser.add_subparsers(dest="command")
 
     commands = {
+        "prepare": ikdsplit.preparer,
         "convert": ikdsplit.converter,
         "fill": ikdsplit.filler,
         "regress": ikdsplit.regressor,
