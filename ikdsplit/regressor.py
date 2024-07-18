@@ -51,16 +51,13 @@ def multiply(
     """
     basis_change_0, origin_shift_0 = op0
     basis_change_1, origin_shift_1 = op1
-    basis_change = basis_change_1 @ basis_change_0
-    origin_shift = basis_change_1 @ origin_shift_0 + origin_shift_1
+    basis_change = basis_change_0 @ basis_change_1
+    origin_shift = basis_change_0 @ origin_shift_1 + origin_shift_0
     return basis_change, origin_shift
 
 
-def cumulate_coordinate_change(
-    basis_change_last: np.ndarray,
-    origin_shift_last: np.ndarray,
-) -> tuple[np.ndarray, np.ndarray]:
-    """Cumulate changes of the coordinate system."""
+def cumulate_coordinate_change(ops_last) -> tuple[np.ndarray, np.ndarray]:
+    """Cumulate changes of the coordinate system in the application order."""
     ops = []
     fn = ""
     while True:
@@ -70,37 +67,27 @@ def cumulate_coordinate_change(
         with open(fn, encoding="utf-8") as f:
             d = yaml.safe_load(f)
         ops.append(invert(d["rotation"], d["translation"]))
-    ops.append((basis_change_last, origin_shift_last))
+    ops.extend(ops_last)
     return functools.reduce(multiply, ops)
 
 
 def add_arguments(parser):
-    parser.add_argument(
-        "--rotation",
-        nargs=9,
-        default=[1, 0, 0, 0, 1, 0, 0, 0, 1],
-        type=int,
-    )
-    parser.add_argument(
-        "--translation",
-        nargs=3,
-        default=[0.0, 0.0, 0.0],
-        type=float,
-    )
+    parser.add_argument("--transformations")
 
 
 def run(args):
-    basis_change_last = np.array(args.rotation).reshape(3, 3)
-    origin_shift_last = np.array(args.translation)
-    basis_change, origin_shift = cumulate_coordinate_change(
-        basis_change_last,
-        origin_shift_last,
-    )
+    ops = []
+    if args.transformations is not None:
+        with open(args.transformations, encoding="utf-8") as f:
+            ops = yaml.safe_load(f)
+        ops = [[np.array(_) for _ in op] for op in ops]
+    basis_change, origin_shift = cumulate_coordinate_change(ops)
 
+    # calculate atomic positions in the target supercell
     df = pd.read_csv("atoms_conventional.csv", skipinitialspace=True)
     symbols = df["symbol"].unique()
     df[["x", "y", "z"]] -= origin_shift
-    df[["x", "y", "z"]] @= basis_change.T
+    df[["x", "y", "z"]] @= np.linalg.inv(basis_change).T
     df = format_df(df)
     df.to_csv("atoms_regressed.csv", float_format="%24.18f", index=False)
 
