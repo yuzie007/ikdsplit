@@ -13,7 +13,12 @@ def add_labels(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def make_atoms(df: pd.DataFrame, spacegroup: int, cell: np.ndarray):
+def make_atoms(
+    df: pd.DataFrame,
+    spacegroup: int,
+    cell: np.ndarray,
+    primitive: bool,
+):
     # hexagonal cell (consistent with Bilbao) for rhombohedral space groups
     setting = 1 if (3 <= spacegroup <= 15 or 143 <= spacegroup <= 194) else 2
 
@@ -26,6 +31,7 @@ def make_atoms(df: pd.DataFrame, spacegroup: int, cell: np.ndarray):
             spacegroup=spacegroup,
             cell=cell,
             setting=setting,
+            primitive_cell=primitive,
         )
     except Exception:
         atoms = crystal(
@@ -33,6 +39,7 @@ def make_atoms(df: pd.DataFrame, spacegroup: int, cell: np.ndarray):
             basis=basis,
             spacegroup=spacegroup,
             cell=cell,
+            primitive_cell=primitive,
         )
     return atoms
 
@@ -41,6 +48,7 @@ def make_images(
     df: pd.DataFrame,
     spacegroup: int,
     cell: np.ndarray,
+    primitive: bool,
     choices: list[list[bool]],
 ) -> list[Atoms]:
     symbols = df["symbol"].unique()
@@ -50,7 +58,7 @@ def make_images(
     for included in itertools.product(*choices):
         i += 1
         df_included = df[list(included)]
-        atoms = make_atoms(df_included, spacegroup, cell)
+        atoms = make_atoms(df_included, spacegroup, cell, primitive)
         images.append(atoms)
         d = {}
         d["index"] = i
@@ -115,10 +123,16 @@ def run(args):
 
     choices = make_choices(df, args.always, args.never, args.selected)
 
-    images, df_tmp = make_images(df, spacegroup, cell, choices)
-
-    for i, atoms in enumerate(images):
-        fn = f"POSCAR-{i:09d}"
-        atoms.write(fn, direct=True)
-
-    df_tmp.to_csv("info_conventional.csv", index=False)
+    for primitive in [False, True]:
+        images, df_tmp = make_images(
+            df,
+            spacegroup,
+            cell,
+            primitive=primitive,
+            choices=choices,
+        )
+        for i, atoms in enumerate(images):
+            fn = f"PPOSCAR-{i:09d}" if primitive else f"CPOSCAR-{i:09d}"
+            atoms.write(fn, direct=True)
+        fn = "info_primitive.csv" if primitive else "info_conventional.csv"
+        df_tmp.to_csv(fn, index=False)
