@@ -7,11 +7,7 @@ import yaml
 from ikdsplit.utils import format_df
 
 
-def add_arguments(parser):
-    pass
-
-
-def run(args):
+def convert():
     cell = np.loadtxt("../cell.dat")
 
     with open("wycksplit.yaml", encoding="utf-8") as f:
@@ -53,3 +49,11 @@ def run(args):
     df = format_df(df)
     filename = "atoms_conventional.csv"
     df.to_csv(filename, float_format="%24.18f", index=False)
+
+
+def add_arguments(parser):
+    pass
+
+
+def run(args):
+    convert()

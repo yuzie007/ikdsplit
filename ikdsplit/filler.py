@@ -89,6 +89,34 @@ def make_choices(
     return choices
 
 
+def fill(always: list[str], never: list[str], selected: list[str]):
+    cell = np.loadtxt("cell.dat")
+
+    with open("wycksplit.yaml", encoding="utf-8") as f:
+        mapping = yaml.safe_load(f)
+
+    spacegroup = mapping["space_group_number_sub"]
+
+    df = pd.read_csv("atoms_conventional.csv", skipinitialspace=True)
+    df = add_labels(df)
+
+    choices = make_choices(df, always, never, selected)
+
+    for primitive in [False, True]:
+        images, df_tmp = make_images(
+            df,
+            spacegroup,
+            cell,
+            primitive=primitive,
+            choices=choices,
+        )
+        for i, atoms in enumerate(images):
+            fn = f"PPOSCAR-{i:09d}" if primitive else f"CPOSCAR-{i:09d}"
+            atoms.write(fn, direct=True)
+        fn = "info_primitive.csv" if primitive else "info_conventional.csv"
+        df_tmp.to_csv(fn, index=False)
+
+
 def add_arguments(parser):
     parser.add_argument(
         "--always",
@@ -111,28 +139,4 @@ def add_arguments(parser):
 
 
 def run(args):
-    cell = np.loadtxt("cell.dat")
-
-    with open("wycksplit.yaml", encoding="utf-8") as f:
-        mapping = yaml.safe_load(f)
-
-    spacegroup = mapping["space_group_number_sub"]
-
-    df = pd.read_csv("atoms_conventional.csv", skipinitialspace=True)
-    df = add_labels(df)
-
-    choices = make_choices(df, args.always, args.never, args.selected)
-
-    for primitive in [False, True]:
-        images, df_tmp = make_images(
-            df,
-            spacegroup,
-            cell,
-            primitive=primitive,
-            choices=choices,
-        )
-        for i, atoms in enumerate(images):
-            fn = f"PPOSCAR-{i:09d}" if primitive else f"CPOSCAR-{i:09d}"
-            atoms.write(fn, direct=True)
-        fn = "info_primitive.csv" if primitive else "info_conventional.csv"
-        df_tmp.to_csv(fn, index=False)
+    fill(args.always, args.never, args.selected)

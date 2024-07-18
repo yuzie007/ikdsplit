@@ -101,12 +101,7 @@ def cumulate_coordinate_change(
     return functools.reduce(multiply, ops)
 
 
-def add_arguments(parser):
-    parser.add_argument("--transformations")
-
-
-def run(args):
-    transformations = args.transformations
+def regress(transformations: list):
     basis_change, origin_shift = cumulate_coordinate_change(transformations)
 
     # calculate atomic positions in the target supercell
@@ -130,3 +125,11 @@ def run(args):
         ds.append(d)
     df = pd.DataFrame(ds)
     df.to_csv("info_regressed.csv", index=False)
+
+
+def add_arguments(parser):
+    parser.add_argument("--transformations")
+
+
+def run(args):
+    regress(args.transformations)

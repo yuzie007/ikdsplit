@@ -29,14 +29,7 @@ def sort_atoms(atoms: Atoms, atoms_ref: Atoms) -> Atoms:
     return atoms_ref[tmp]
 
 
-def add_arguments(parser):
-    parser.add_argument(
-        "--ref",
-        help="atoms with the reference order",
-    )
-
-
-def run(args):
+def sort_all(ref: str):
     """Sort atoms in the order in the reference file.
 
     Only `scaled_positions` are referred to, and `cell` is kept.
@@ -45,11 +38,11 @@ def run(args):
 
     Parameters
     ----------
-    args : _type_
-        _description_
+    ref : str
+        Atoms with the reference positions.
 
     """
-    atoms_ref = ase.io.read(args.ref)
+    atoms_ref = ase.io.read(ref)
     df = pd.read_csv("info_conventional.csv", skipinitialspace=True)
     for d in df.to_dict(orient="records"):
         index = d["index"]
@@ -58,3 +51,14 @@ def run(args):
         atoms = ase.io.read(fin)
         atoms = sort_atoms(atoms, atoms_ref)
         atoms.write(fout, direct=True)
+
+
+def add_arguments(parser):
+    parser.add_argument(
+        "--ref",
+        help="atoms with the reference order",
+    )
+
+
+def run(args):
+    sort_all(args.ref)
