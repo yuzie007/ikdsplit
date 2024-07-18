@@ -42,6 +42,12 @@ reference = '/Users/ikeda/Documents/projects/2022/Laves_AFM/data/codes/C15p_sub/
 
 `FPOSCAR`
 
+Run
+
+```
+ikdsplit run -l 2
+```
+
 ## Release notes
 
 ### 0.1.0

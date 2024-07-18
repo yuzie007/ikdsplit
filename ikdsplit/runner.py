@@ -11,43 +11,85 @@ from ikdsplit.sorter import sort_all
 from ikdsplit.utils import cd
 
 
-def run_each(config: dict):
-    convert()
-
-    d = config["fill"]
-    fill(d["always"], d["never"], d["selected"])
-
-    d = config["regress"]
-    regress(d["transformations"])
-
-    d = config["sort"]
-    sort_all(d["reference"])
+def print_group(group: int, level: int):
+    s = ""
+    if level > 1:
+        s += "   " * (level - 1)
+    if level > 0:
+        s += "-> "
+    s += f"{group:03d}"
+    print(s)
 
 
-def run_all():
-    with open("ikdsplit.toml", "rb") as f:
-        config = tomllib.load(f)
-
-    group = config["space_group_number"]
-
+def get_subgroups(group: int):
     src = pathlib.Path(__file__).parent / "database"
     fn = src / "subgroups.dat"
     subgroups = np.genfromtxt(fn, dtype=(int, int, "U1"), usecols=(0, 1, 2))
     g2h = subgroups[[_[0] == group for _ in subgroups]]
-    subgroups = [_[1] for _ in g2h]
-    for subgroup in subgroups:
-        print(f"{group:03d} -> {subgroup:03d}")
-        dn = pathlib.Path(f"{subgroup:03d}")
-        dn.mkdir(parents=True, exist_ok=True)
-        with cd(dn):
-            fn = src / "wycksplit" / f"{group:03d}_{subgroup:03d}.yaml"
+    return [_[1] for _ in g2h]
+
+
+def write_wycksplit_yaml_orig(group: int):
+    s = f"""\
+space_group_number_sup: {group}
+space_group_number_sub: {group}
+basis_change:
+- [ 1.0,  0.0,  0.0]
+- [ 0.0,  1.0,  0.0]
+- [ 0.0,  0.0,  1.0]
+origin_shift: [ 0.00000,  0.00000,  0.00000]
+"""
+    with open("wycksplit.yaml", "w") as f:
+        f.write(s)
+
+
+def run_each(
+    config: dict,
+    supergroup: int,
+    group: int,
+    level: int,
+    max_level: int,
+):
+    print_group(group, level)
+
+    src = pathlib.Path(__file__).parent / "database"
+    dn = pathlib.Path(f"{group:03d}")
+    dn.mkdir(parents=True, exist_ok=True)
+    with cd(dn):
+        if supergroup:
+            fn = src / "wycksplit" / f"{supergroup:03d}_{group:03d}.yaml"
             shutil.copy(fn, "wycksplit.yaml")
-            run_each(config)
+            convert()
+        else:
+            write_wycksplit_yaml_orig(group)
+            shutil.copy2("../atoms_conventional.csv", ".")
+
+        d = config["fill"]
+        fill(d["always"], d["never"], d["selected"])
+
+        d = config["regress"]
+        regress(d["transformations"])
+
+        d = config["sort"]
+        sort_all(d["reference"])
+
+        if 0 <= max_level <= level:
+            return
+
+        subgroups = get_subgroups(group)
+        for subgroup in subgroups:
+            run_each(config, group, subgroup, level + 1, max_level)
+
+
+def run_all(max_level: int = 1):
+    with open("ikdsplit.toml", "rb") as f:
+        config = tomllib.load(f)
+    run_each(config, None, config["space_group_number"], 0, max_level)
 
 
 def add_arguments(parser):
-    pass
+    parser.add_argument("-l", "--level", default=1, type=int)
 
 
 def run(args):
-    run_all()
+    run_all(args.level)
