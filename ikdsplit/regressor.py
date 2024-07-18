@@ -89,7 +89,7 @@ def cumulate_coordinate_change(
             break
         with open(fn, encoding="utf-8") as f:
             d = yaml.safe_load(f)
-        ops.append(invert(d["rotation"], d["translation"]))
+        ops.append(invert(d["basis_change"], d["origin_shift"]))
 
     if transformations is not None:
         with open(transformations, encoding="utf-8") as f:

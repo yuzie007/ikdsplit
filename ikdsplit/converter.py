@@ -19,7 +19,7 @@ def run(args):
 
     df = pd.read_csv("../atoms_conventional.csv", skipinitialspace=True)
 
-    cell = (cell.T @ mapping["rotation"]).T
+    cell = (cell.T @ mapping["basis_change"]).T
 
     np.savetxt("cell.dat", cell, fmt="%24.18f")
 
@@ -35,10 +35,10 @@ def run(args):
 
             # representative for split wyckoff sites
             xyz = s[["x", "y", "z"]].to_numpy(float)
-            basis.append(d["rotation"] @ xyz + d["translation"])
+            basis.append(d["basis_change"] @ xyz + d["origin_shift"])
 
-    basis = np.array(basis) - mapping["translation"]
-    basis = (np.linalg.inv(mapping["rotation"]) @ basis.T).T
+    basis = np.array(basis) - mapping["origin_shift"]
+    basis = (np.linalg.inv(mapping["basis_change"]) @ basis.T).T
     basis -= np.rint(basis)
 
     d = {
