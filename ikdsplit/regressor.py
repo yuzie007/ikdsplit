@@ -17,6 +17,7 @@ def get_p2c(spacegroup: int) -> np.ndarray:
     centering = _lattice_centering[spacegroup]
     p2c = {
         "P": np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]]),
+        "C": np.array([[1, -1, 0], [1, 1, 0], [0, 0, 1]]),
         "F": np.array([[-1, 1, 1], [1, -1, 1], [1, 1, -1]]),
         "I": np.array([[0, 1, 1], [1, 0, 1], [1, 1, 0]]),
         "R": np.array([[1, 0, 1], [-1, 1, 1], [0, -1, 1]]),
