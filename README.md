@@ -2,6 +2,8 @@
 
 ## Usage
 
+4 input files are necessary.
+
 `cell.dat`
 
 ```
@@ -37,7 +39,7 @@ selected = ["H"]
 "origin_shift" = [ 0.00000,  0.00000,  0.00000]
 
 [sort]
-reference = '/Users/ikeda/Documents/projects/2022/Laves_AFM/data/codes/C15p_sub/FPOSCAR'
+reference = "FPOSCAR"  # atoms are sorted in this order
 ```
 
 `FPOSCAR`

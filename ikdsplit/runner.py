@@ -1,14 +1,23 @@
+"""Run recursively."""
+
 import pathlib
 import shutil
+import tomllib
 
 import numpy as np
-import tomllib
 
 from ikdsplit.converter import convert
 from ikdsplit.filler import fill
 from ikdsplit.regressor import regress
 from ikdsplit.sorter import sort_all
 from ikdsplit.utils import cd
+
+
+def parse_config(config: dict) -> dict:
+    """Parse `ikdsplit.toml."""
+    path = pathlib.Path(config["sort"]["reference"])
+    config["sort"]["reference"] = path.resolve()
+    return config
 
 
 def print_group(group: int, level: int):
@@ -82,6 +91,7 @@ def run_each(
 def run_all(max_level: int = 1):
     with open("ikdsplit.toml", "rb") as f:
         config = tomllib.load(f)
+    config = parse_config(config)
     run_each(config, None, config["space_group_number"], 0, max_level)
 
 
