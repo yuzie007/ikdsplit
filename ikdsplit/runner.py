@@ -60,6 +60,7 @@ def run_each(
         else:
             write_wycksplit_toml_orig(group)
             shutil.copy2("../atoms_conventional.csv", ".")
+            shutil.copy2("../cell.dat", ".")
 
         d = config["fill"]
         fill(d["always"], d["never"], d["selected"])
