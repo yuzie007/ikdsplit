@@ -5,12 +5,13 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "ikdsplit"
 version = "0.1.0"
-authors = [
-    {name = "Yuji Ikeda"},
-]
 dependencies = [
     "ase",
     "spglib",
+]
+requires-python = ">=3.11"  # tomllib
+authors = [
+    {name = "Yuji Ikeda"},
 ]
 
 [project.scripts]
