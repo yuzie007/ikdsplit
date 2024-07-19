@@ -18,7 +18,7 @@ authors = [
 ikdsplit = "ikdsplit.__init__:main"
 
 [tool.setuptools.package-data]
-wycksplit = ["*.yaml"]
+"ikdsplit.database.wycksplit" = ["*.toml"]
 
 [tool.ruff.lint]
 select = ["ALL"]
