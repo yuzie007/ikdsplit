@@ -46,8 +46,14 @@ reference = "FPOSCAR"  # atoms are sorted in this order
 
 Run
 
+```bash
+ikdsplit run -l 2  # 2 levels of maximal subgroups are checked
 ```
-ikdsplit run -l 2
+
+Check the number of obtained `SPOSCAR-*`
+
+```bash
+find . -name "SPOSCAR-*" | wc
 ```
 
 ## Release notes

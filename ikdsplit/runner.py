@@ -96,7 +96,13 @@ def run_all(max_level: int = 1):
 
 
 def add_arguments(parser):
-    parser.add_argument("-l", "--level", default=1, type=int)
+    parser.add_argument(
+        "-l",
+        "--level",
+        default=1,
+        type=int,
+        help="level up to which maximal subgroups are checked",
+    )
 
 
 def run(args):
