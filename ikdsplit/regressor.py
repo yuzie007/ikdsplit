@@ -1,10 +1,10 @@
 import functools
 import os
+import tomllib
 
 import ase.io
 import numpy as np
 import pandas as pd
-import yaml
 from ase import Atoms
 from ase.build import make_supercell
 from ase.spacegroup.crystal_data import _lattice_centering
@@ -76,20 +76,20 @@ def cumulate_coordinate_change(
     """Cumulate changes of the coordinate system in the application order."""
     ops = []
 
-    if os.path.isfile("wycksplit.yaml"):
-        with open("wycksplit.yaml", encoding="utf-8") as f:
-            d = yaml.safe_load(f)
+    if os.path.isfile("wycksplit.toml"):
+        with open("wycksplit.toml", "rb", encoding="utf-8") as f:
+            d = tomllib.load(f)
         basis_change_first = get_p2c(d["space_group_number_sub"])
         origin_shift_first = np.array([0.0, 0.0, 0.0])
         ops.append((basis_change_first, origin_shift_first))
 
     fn = ""
     while True:
-        fn = "wycksplit.yaml" if not fn else os.path.join("..", fn)
+        fn = "wycksplit.toml" if not fn else os.path.join("..", fn)
         if not os.path.isfile(fn):
             break
         with open(fn, encoding="utf-8") as f:
-            d = yaml.safe_load(f)
+            d = tomllib.load(f)
         ops.append(invert(d["basis_change"], d["origin_shift"]))
 
     if transformations:

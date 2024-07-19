@@ -1,8 +1,8 @@
 import string
+import tomllib
 
 import numpy as np
 import pandas as pd
-import yaml
 
 from ikdsplit.utils import format_df
 
@@ -10,8 +10,8 @@ from ikdsplit.utils import format_df
 def convert():
     cell = np.loadtxt("../cell.dat")
 
-    with open("wycksplit.yaml", encoding="utf-8") as f:
-        mapping = yaml.safe_load(f)
+    with open("wycksplit.toml", "rb", encoding="utf-8") as f:
+        mapping = tomllib.load(f)
 
     df = pd.read_csv("../atoms_conventional.csv", skipinitialspace=True)
 

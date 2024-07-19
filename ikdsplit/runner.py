@@ -29,17 +29,14 @@ def get_subgroups(group: int):
     return [_[1] for _ in g2h]
 
 
-def write_wycksplit_yaml_orig(group: int):
+def write_wycksplit_toml_orig(group: int):
     s = f"""\
-space_group_number_sup: {group}
-space_group_number_sub: {group}
-basis_change:
-- [ 1.0,  0.0,  0.0]
-- [ 0.0,  1.0,  0.0]
-- [ 0.0,  0.0,  1.0]
-origin_shift: [ 0.00000,  0.00000,  0.00000]
+space_group_number_sup = {group}
+space_group_number_sub = {group}
+basis_change = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+origin_shift = [0.0, 0.0, 0.0]
 """
-    with open("wycksplit.yaml", "w") as f:
+    with open("wycksplit.toml", "w", encoding="utf-8") as f:
         f.write(s)
 
 
@@ -57,11 +54,11 @@ def run_each(
     dn.mkdir(parents=True, exist_ok=True)
     with cd(dn):
         if supergroup:
-            fn = src / "wycksplit" / f"{supergroup:03d}_{group:03d}.yaml"
-            shutil.copy(fn, "wycksplit.yaml")
+            fn = src / "wycksplit" / f"{supergroup:03d}_{group:03d}.toml"
+            shutil.copy(fn, "wycksplit.toml")
             convert()
         else:
-            write_wycksplit_yaml_orig(group)
+            write_wycksplit_toml_orig(group)
             shutil.copy2("../atoms_conventional.csv", ".")
 
         d = config["fill"]

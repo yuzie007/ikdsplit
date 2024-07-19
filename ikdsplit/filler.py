@@ -1,8 +1,8 @@
 import itertools
+import tomllib
 
 import numpy as np
 import pandas as pd
-import yaml
 from ase.spacegroup import crystal, get_spacegroup
 from ase import Atoms
 
@@ -92,8 +92,8 @@ def make_choices(
 def fill(always: list[str], never: list[str], selected: list[str]):
     cell = np.loadtxt("cell.dat")
 
-    with open("wycksplit.yaml", encoding="utf-8") as f:
-        mapping = yaml.safe_load(f)
+    with open("wycksplit.toml", "rb", encoding="utf-8") as f:
+        mapping = tomllib.load(f)
 
     spacegroup = mapping["space_group_number_sub"]
 
