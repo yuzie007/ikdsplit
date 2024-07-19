@@ -1,6 +1,22 @@
 # ikdsplit
 
-## Usage
+## Installation
+
+Published version:
+
+```bash
+pip install git+https://github.com/yuzie007/ikdsplit.git@v0.1.0
+```
+
+Development version:
+
+```bash
+git clone https://github.com/yuzie007/ikdsplit.git
+cd ikdsplit
+pip install -e .
+```
+
+## Input files
 
 4 input files are necessary.
 
@@ -32,17 +48,19 @@ never = []
 selected = ["H"]
 
 [[regress.transformations]]  # origin choice 2 -> 1
-"basis_change" = [[ 1,  0,  0], [ 0,  1,  0], [ 0,  0,  1]]
-"origin_shift" = [-0.12500, -0.12500, -0.12500]
+basis_change = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+origin_shift = [-0.125, -0.125, -0.125]
 [[regress.transformations]]  # conventional -> 2x2x2 primitive
-"basis_change" = [[ 0,  1,  1], [ 1,  0,  1], [ 1,  1,  0]]
-"origin_shift" = [ 0.00000,  0.00000,  0.00000]
+basis_change = [[0, 1, 1], [1, 0, 1], [1, 1, 0]]
+origin_shift = [0.0, 0.0, 0.0]
 
 [sort]
 reference = "FPOSCAR"  # atoms are sorted in this order
 ```
 
 `FPOSCAR`
+
+## Usage
 
 Run
 
@@ -56,6 +74,16 @@ Check the number of obtained `SPOSCAR-*`
 find . -name "SPOSCAR-*" | wc
 ```
 
+## Output files
+
+- `wycksplit.toml`: information of Wyckoff splitting
+- `PPOSCAR-*`: primitive cell of the subgroup
+- `CPOSCAR-*`: conventional cell of the subgroup
+- `RPOSCAR-*`: atoms with the target supercell
+- `SPOSCAR-*`: `RPOSCAR-*` sorted in the same order as `FPOSCAR`
+
 ## Release notes
 
 ### 0.1.0
+
+- Initial release working only for `227` and up to level `2`
