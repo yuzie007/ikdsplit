@@ -10,7 +10,7 @@ from ikdsplit.utils import format_df
 def convert():
     cell = np.loadtxt("../cell.dat")
 
-    with open("wycksplit.toml", "rb", encoding="utf-8") as f:
+    with open("wycksplit.toml", "rb") as f:
         mapping = tomllib.load(f)
 
     df = pd.read_csv("../atoms_conventional.csv", skipinitialspace=True)

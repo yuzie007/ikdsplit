@@ -77,7 +77,7 @@ def cumulate_coordinate_change(
     ops = []
 
     if os.path.isfile("wycksplit.toml"):
-        with open("wycksplit.toml", "rb", encoding="utf-8") as f:
+        with open("wycksplit.toml", "rb") as f:
             d = tomllib.load(f)
         basis_change_first = get_p2c(d["space_group_number_sub"])
         origin_shift_first = np.array([0.0, 0.0, 0.0])
@@ -88,7 +88,7 @@ def cumulate_coordinate_change(
         fn = "wycksplit.toml" if not fn else os.path.join("..", fn)
         if not os.path.isfile(fn):
             break
-        with open(fn, encoding="utf-8") as f:
+        with open(fn, "rb") as f:
             d = tomllib.load(f)
         ops.append(invert(d["basis_change"], d["origin_shift"]))
 

@@ -92,7 +92,7 @@ def make_choices(
 def fill(always: list[str], never: list[str], selected: list[str]):
     cell = np.loadtxt("cell.dat")
 
-    with open("wycksplit.toml", "rb", encoding="utf-8") as f:
+    with open("wycksplit.toml", "rb") as f:
         mapping = tomllib.load(f)
 
     spacegroup = mapping["space_group_number_sub"]
