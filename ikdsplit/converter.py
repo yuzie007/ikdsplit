@@ -1,3 +1,5 @@
+"""Convert `atoms_conventional.csv`."""
+
 import string
 import tomllib
 
@@ -7,11 +9,21 @@ import pandas as pd
 from ikdsplit.utils import format_df
 
 
+def parse_wycksplit(d: dict) -> dict:
+    """Parse `wycksplit.toml`."""
+    if "coset_representatives" in d:
+        reps = d["coset_representatives"]
+        for k0, v0 in d["wycksplit"].items():
+            d["wycksplit"][k0] = {k1: reps[v1] for k1, v1 in v0.items()}
+    return d
+
+
 def convert():
     cell = np.loadtxt("../cell.dat")
 
     with open("wycksplit.toml", "rb") as f:
         mapping = tomllib.load(f)
+    mapping = parse_wycksplit(mapping)
 
     df = pd.read_csv("../atoms_conventional.csv", skipinitialspace=True)
 
