@@ -1,3 +1,7 @@
+"""Sort atoms."""
+
+import shutil
+
 import ase.io
 import numpy as np
 import pandas as pd
@@ -30,7 +34,7 @@ def sort_atoms(atoms: Atoms, atoms_ref: Atoms) -> Atoms:
     return atoms_ref[tmp]
 
 
-def sort_all(reference: str):
+def sort_all(reference: str | None) -> None:
     """Sort atoms in the order in the reference file.
 
     Only `scaled_positions` are referred to, and `cell` is kept.
@@ -39,19 +43,24 @@ def sort_all(reference: str):
 
     Parameters
     ----------
-    ref : str
+    reference : str | None, default = None
         Atoms with the reference positions.
+        If None, each file is simply copied.
 
     """
-    atoms_ref = ase.io.read(reference)
+    if reference is not None:
+        atoms_ref = ase.io.read(reference)
     df = pd.read_csv("info_conventional.csv", skipinitialspace=True)
     for d in df.to_dict(orient="records"):
         index = d["index"]
         fin = f"RPOSCAR-{index:09d}"
         fout = f"SPOSCAR-{index:09d}"
-        atoms = ase.io.read(fin)
-        atoms = sort_atoms(atoms, atoms_ref)
-        atoms.write(fout, direct=True)
+        if reference is not None:
+            atoms = ase.io.read(fin)
+            atoms = sort_atoms(atoms, atoms_ref)
+            atoms.write(fout, direct=True)
+        else:
+            shutil.copy2(fin, fout)
 
 
 def add_arguments(parser):

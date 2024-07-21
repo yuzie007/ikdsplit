@@ -13,10 +13,19 @@ from ikdsplit.sorter import sort_all
 from ikdsplit.utils import cd
 
 
+def make_default_config() -> dict:
+    """Make default `config`."""
+    config = {}
+    config["regress"] = {"transformations": []}
+    config["sort"] = {"reference": None}
+    return config
+
+
 def parse_config(config: dict) -> dict:
     """Parse `ikdsplit.toml."""
-    path = pathlib.Path(config["sort"]["reference"])
-    config["sort"]["reference"] = path.resolve()
+    if config["sort"]["reference"] is not None:
+        path = pathlib.Path(config["sort"]["reference"])
+        config["sort"]["reference"] = path.resolve()
     return config
 
 
@@ -49,13 +58,14 @@ origin_shift = [0.0, 0.0, 0.0]
         f.write(s)
 
 
-def run_each(
+def recur(
     config: dict,
     supergroup: int,
     group: int,
     level: int,
     max_level: int,
-):
+) -> None:
+    """Run each subgroup recursively."""
     print_group(group, level)
 
     src = pathlib.Path(__file__).parent / "database"
@@ -85,14 +95,16 @@ def run_each(
 
         subgroups = get_subgroups(group)
         for subgroup in subgroups:
-            run_each(config, group, subgroup, level + 1, max_level)
+            recur(config, group, subgroup, level + 1, max_level)
 
 
-def run_all(max_level: int = 1):
+def start(max_level: int = 1) -> None:
+    """Start calculations."""
+    config = make_default_config()
     with open("ikdsplit.toml", "rb") as f:
-        config = tomllib.load(f)
+        config.update(tomllib.load(f))
     config = parse_config(config)
-    run_each(config, None, config["space_group_number"], 0, max_level)
+    recur(config, None, config["space_group_number"], 0, max_level)
 
 
 def add_arguments(parser):
@@ -106,4 +118,4 @@ def add_arguments(parser):
 
 
 def run(args):
-    run_all(args.level)
+    start(args.level)
