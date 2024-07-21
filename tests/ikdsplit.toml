@@ -1,0 +1,16 @@
+space_group_number = 227
+
+[fill]
+always = ["Ti", "Cr"]
+never = []
+selected = ["H"]
+
+[[regress.transformations]]  # origin choice 2 -> 1
+basis_change = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+origin_shift = [-0.125, -0.125, -0.125]
+[[regress.transformations]]  # conventional -> 2x2x2 primitive
+basis_change = [[0, 1, 1], [1, 0, 1], [1, 1, 0]]
+origin_shift = [0.0, 0.0, 0.0]
+
+[sort]
+reference = "FPOSCAR"  # atoms are sorted in this order
