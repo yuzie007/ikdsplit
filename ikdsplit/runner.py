@@ -4,13 +4,11 @@ import pathlib
 import shutil
 import tomllib
 
-import numpy as np
-
 from ikdsplit.converter import convert
 from ikdsplit.filler import fill
 from ikdsplit.regressor import regress
 from ikdsplit.sorter import sort_all
-from ikdsplit.utils import cd
+from ikdsplit.utils import cd, get_subgroups
 
 
 def make_default_config() -> dict:
@@ -37,14 +35,6 @@ def print_group(group: int, level: int):
         s += "-> "
     s += f"{group:03d}"
     print(s)
-
-
-def get_subgroups(group: int):
-    src = pathlib.Path(__file__).parent / "database"
-    fn = src / "subgroups.dat"
-    subgroups = np.genfromtxt(fn, dtype=(int, int, "U1"), usecols=(0, 1, 2))
-    g2h = subgroups[[_[0] == group for _ in subgroups]]
-    return [_[1] for _ in g2h]
 
 
 def write_wycksplit_toml_orig(group: int):

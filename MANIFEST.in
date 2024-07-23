@@ -1,2 +1,1 @@
-include ikdsplit/database/subgroups.dat
 include ikdsplit/database/wycksplit/*.yaml
