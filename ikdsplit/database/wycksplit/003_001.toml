@@ -1,29 +1,18 @@
 space_group_number_sup = 3
 space_group_number_sub = 1
-basis_change = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+basis_change = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+origin_shift = [0.0, 0.0, 0.0]
+
+[[coset_representatives]]
+basis_change = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+origin_shift = [0.0, 0.0, 0.0]
+[[coset_representatives]]
+basis_change = [[-1, 0, 0], [0, 1, 0], [0, 0, -1]]
 origin_shift = [0.0, 0.0, 0.0]
 
 [wycksplit]
-[wycksplit.2e]
-[wycksplit.2e.1a1]
-basis_change = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
-origin_shift = [0.0, 0.0, 0.0]
-[wycksplit.2e.1a2]
-basis_change = [[-1, 0, 0], [0, 1, 0], [0, 0, -1]]
-origin_shift = [0.0, 0.0, 0.0]
-[wycksplit.1d]
-[wycksplit.1d.1a1]
-basis_change = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
-origin_shift = [0.0, 0.0, 0.0]
-[wycksplit.1c]
-[wycksplit.1c.1a1]
-basis_change = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
-origin_shift = [0.0, 0.0, 0.0]
-[wycksplit.1b]
-[wycksplit.1b.1a1]
-basis_change = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
-origin_shift = [0.0, 0.0, 0.0]
-[wycksplit.1a]
-[wycksplit.1a.1a1]
-basis_change = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
-origin_shift = [0.0, 0.0, 0.0]
+"2e" = {"1a1" = 0, "1a2" = 1}
+"1d" = {"1a1" = 0}
+"1c" = {"1a1" = 0}
+"1b" = {"1a1" = 0}
+"1a" = {"1a1" = 0}

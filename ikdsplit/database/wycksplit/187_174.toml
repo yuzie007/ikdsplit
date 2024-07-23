@@ -1,0 +1,28 @@
+space_group_number_sup = 187
+space_group_number_sub = 174
+basis_change = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+origin_shift = [0.0, 0.0, 0.0]
+
+[[coset_representatives]]
+basis_change = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+origin_shift = [0.0, 0.0, 0.0]
+[[coset_representatives]]
+basis_change = [[0, -1, 0], [-1, 0, 0], [0, 0, 1]]
+origin_shift = [0.0, 0.0, 0.0]
+
+[wycksplit]
+"12o" = {"6l1" = 0, "6l2" = 1}
+"6n" = {"6l1" = 0}
+"6m" = {"3k1" = 0, "3k2" = 1}
+"6l" = {"3j1" = 0, "3j2" = 1}
+"3k" = {"3k1" = 0}
+"3j" = {"3j1" = 0}
+"2i" = {"2i1" = 0}
+"2h" = {"2h1" = 0}
+"2g" = {"2g1" = 0}
+"1f" = {"1f1" = 0}
+"1e" = {"1e1" = 0}
+"1d" = {"1d1" = 0}
+"1c" = {"1c1" = 0}
+"1b" = {"1b1" = 0}
+"1a" = {"1a1" = 0}

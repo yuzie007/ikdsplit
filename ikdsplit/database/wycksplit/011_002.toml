@@ -1,0 +1,19 @@
+space_group_number_sup = 11
+space_group_number_sub = 2
+basis_change = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+origin_shift = [0.0, 0.0, 0.0]
+
+[[coset_representatives]]
+basis_change = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+origin_shift = [0.0, 0.0, 0.0]
+[[coset_representatives]]  # screw
+basis_change = [[-1, 0, 0], [0, 1, 0], [0, 0, -1]]
+origin_shift = [0.0, 0.5, 0.0]
+
+[wycksplit]
+"4f" = {"2i1" = 0, "2i2" = 1}
+"2e" = {"2i1" = 0}
+"2d" = {"1f1" = 0, "1h1" = 1}
+"2c" = {"1b1" = 0, "1g1" = 1}
+"2b" = {"1d1" = 0, "1e1" = 1}
+"2a" = {"1a1" = 0, "1c1" = 1}

@@ -1,0 +1,17 @@
+space_group_number_sup = 186
+space_group_number_sub = 173
+basis_change = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+origin_shift = [0.0, 0.0, 0.0]
+
+[[coset_representatives]]
+basis_change = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+origin_shift = [0.0, 0.0, 0.0]
+[[coset_representatives]]
+basis_change = [[0, -1, 0], [-1, 0, 0], [0, 0, 1]]
+origin_shift = [0.0, 0.0, 0.0]
+
+[wycksplit]
+"12d" = {"6c1" = 0, "6c2" = 1}
+"6c" = {"6c1" = 0}
+"2b" = {"2b1" = 0}
+"2a" = {"2a1" = 0}

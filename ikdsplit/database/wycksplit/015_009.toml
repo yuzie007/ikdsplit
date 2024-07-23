@@ -1,0 +1,19 @@
+space_group_number_sup = 15
+space_group_number_sub = 9
+basis_change = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+origin_shift = [0.0, 0.0, 0.0]
+
+[[coset_representatives]]
+basis_change = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+origin_shift = [0.0, 0.0, 0.0]
+[[coset_representatives]]
+basis_change = [[-1, 0, 0], [0, -1, 0], [0, 0, -1]]
+origin_shift = [0.0, 0.0, 0.0]
+
+[wycksplit]
+"8f" = {"4a1" = 0, "4a2" = 1}
+"4e" = {"4a1" = 0}
+"4d" = {"4a1" = 0}
+"4c" = {"4a1" = 0}
+"4b" = {"4a1" = 0}
+"4a" = {"4a1" = 0}

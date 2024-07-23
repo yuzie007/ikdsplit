@@ -1,0 +1,25 @@
+space_group_number_sup = 182
+space_group_number_sub = 20
+basis_change = [[-1, -1, 0], [1, -1, 0], [0, 0, 1]]
+origin_shift = [0.0, 0.0, 0.25]
+
+[[coset_representatives]]  # (x, y, z)
+basis_change = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+origin_shift = [0.0, 0.0, 0.0]
+[[coset_representatives]]  # (-y, x-y, z)
+basis_change = [[0, -1, 0], [1, -1, 0], [0, 0, 1]]
+origin_shift = [0.0, 0.0, 0.0]
+[[coset_representatives]]  # (-x+y, -x, z)
+basis_change = [[-1, 1, 0], [-1, 0, 0], [0, 0, 1]]
+origin_shift = [0.0, 0.0, 0.0]
+
+[wycksplit]
+"12i" = {"8c1" = 0, "8c2" = 1, "8c3" = 2}
+"6h" = {"8c1" = 0, "4a1" = 2}
+"6g" = {"8c1" = 0, "4b1" = 2}
+"4f" = {"8c1" = 0}
+"4e" = {"8c1" = 0}
+"2d" = {"4a1" = 0}
+"2c" = {"4a1" = 0}
+"2b" = {"4a1" = 0}
+"2a" = {"4b1" = 0}
