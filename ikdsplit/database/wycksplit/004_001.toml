@@ -3,11 +3,12 @@ space_group_number_sub = 1
 basis_change = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
 origin_shift = [0.0, 0.0, 0.0]
 
-[wycksplit]
-[wycksplit.2a]
-[wycksplit.2a.1a1]
+[[coset_representatives]]
 basis_change = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
 origin_shift = [0.0, 0.0, 0.0]
-[wycksplit.2a.1a2]
+[[coset_representatives]]
 basis_change = [[-1, 0, 0], [0, 1, 0], [0, 0, -1]]
 origin_shift = [0.0, 0.5, 0.0]
+
+[wycksplit]
+"2a" = {"1a1" = 0, "1a2" = 1}

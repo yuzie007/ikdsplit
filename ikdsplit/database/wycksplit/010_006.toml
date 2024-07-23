@@ -1,13 +1,28 @@
-space_group_number_sup = 9
-space_group_number_sub = 1
-basis_change = [[0.5, 0.5, 0.0], [-0.5, 0.5, 0.0], [0.0, 0.0, 1.0]]
+space_group_number_sup = 10
+space_group_number_sub = 6
+basis_change = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+origin_shift = [0.0, 0.0, 0.0]
+
+[[coset_representatives]]
+basis_change = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+origin_shift = [0.0, 0.0, 0.0]
+[[coset_representatives]]
+basis_change = [[-1, 0, 0], [0, -1, 0], [0, 0, -1]]
 origin_shift = [0.0, 0.0, 0.0]
 
 [wycksplit]
-[wycksplit.4o]
-[wycksplit.4o.2c1]
-basis_change = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
-origin_shift = [0.0, 0.0, 0.0]
-[wycksplit.4o.2c2]
-basis_change = [[-1, 0, 0], [0, -1, 0], [0, 0, -1]]
-origin_shift = [0.0, 0.0, 0.0]
+"4o" = {"2c1" = 0, "2c2" = 1}
+"2n" = {"1b1" = 0, "1b2" = 1}
+"2m" = {"1a1" = 0, "1a2" = 1}
+"2l" = {"2c1" = 0}
+"2k" = {"2c1" = 0}
+"2j" = {"2c1" = 0}
+"2i" = {"2c1" = 0}
+"1h" = {"1b1" = 0}
+"1g" = {"1a1" = 0}
+"1f" = {"1b1" = 0}
+"1e" = {"1b1" = 0}
+"1d" = {"1a1" = 0}
+"1c" = {"1a1" = 0}
+"1b" = {"1b1" = 0}
+"1a" = {"1a1" = 0}

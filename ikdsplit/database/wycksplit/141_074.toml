@@ -1,60 +1,22 @@
 space_group_number_sup = 141
 space_group_number_sub = 74
-basis_change = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+basis_change = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
 origin_shift = [0.0, 0.0, 0.0]
 
+[[coset_representatives]]
+basis_change = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+origin_shift = [0.0, 0.0, 0.0]
+[[coset_representatives]]  # screw
+basis_change = [[0, -1, 0], [1, 0, 0], [0, 0, 1]]
+origin_shift = [0.25, 0.75, 0.25]
+
 [wycksplit]
-[wycksplit.32i]
-[wycksplit.32i.16j1]
-basis_change = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
-origin_shift = [0.0, 0.0, 0.0]
-[wycksplit.32i.16j2]
-basis_change = [[0, 1, 0], [-1, 0, 0], [0, 0, 1]]
-origin_shift = [0.75, 0.75, 0.25]
-[wycksplit.16h]
-[wycksplit.16h.8h1]
-basis_change = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
-origin_shift = [0.0, 0.0, 0.0]
-[wycksplit.16h.8i1]
-basis_change = [[0, 1, 0], [-1, 0, 0], [0, 0, 1]]
-origin_shift = [0.75, 0.75, 0.25]
-[wycksplit.16g]
-[wycksplit.16g.16j1]
-basis_change = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
-origin_shift = [0.0, 0.0, 0.0]
-[wycksplit.16f]
-[wycksplit.16f.8f1]
-basis_change = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
-origin_shift = [0.0, 0.0, 0.0]
-[wycksplit.16f.8g1]
-basis_change = [[0, 1, 0], [-1, 0, 0], [0, 0, 1]]
-origin_shift = [0.75, 0.75, 0.25]
-[wycksplit.8e]
-[wycksplit.8e.4e1]
-basis_change = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
-origin_shift = [0.0, 0.0, 0.0]
-[wycksplit.8e.4e2]
-basis_change = [[0, 1, 0], [-1, 0, 0], [0, 0, 1]]
-origin_shift = [0.75, 0.75, 0.25]
-[wycksplit.8d]
-[wycksplit.8d.4b1]
-basis_change = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
-origin_shift = [0.0, 0.0, 0.0]
-[wycksplit.8d.4c1]
-basis_change = [[0, 1, 0], [-1, 0, 0], [0, 0, 1]]
-origin_shift = [0.75, 0.75, 0.25]
-[wycksplit.8c]
-[wycksplit.8c.4a1]
-basis_change = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
-origin_shift = [0.0, 0.0, 0.0]
-[wycksplit.8c.4d1]
-basis_change = [[0, 1, 0], [-1, 0, 0], [0, 0, 1]]
-origin_shift = [0.75, 0.75, 0.25]
-[wycksplit.4b]
-[wycksplit.4b.4e1]
-basis_change = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
-origin_shift = [0.0, 0.0, 0.0]
-[wycksplit.4a]
-[wycksplit.4a.4e1]
-basis_change = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
-origin_shift = [0.0, 0.0, 0.0]
+"32i" = {"16j1" = 0, "16j2" = 1}
+"16h" = {"8h1" = 0, "8i1" = 1}
+"16g" = {"16j1" = 0}
+"16f" = {"8f1" = 0, "8g1" = 1}
+"8e" = {"4e1" = 0, "4e2" = 1}
+"8d" = {"4b1" = 0, "4c1" = 1}
+"8c" = {"4a1" = 0, "4d1" = 1}
+"4b" = {"4e1" = 0}
+"4a" = {"4e1" = 0}

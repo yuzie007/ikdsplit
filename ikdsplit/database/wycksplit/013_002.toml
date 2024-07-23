@@ -1,0 +1,20 @@
+space_group_number_sup = 13
+space_group_number_sub = 2
+basis_change = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+origin_shift = [0.0, 0.0, 0.0]
+
+[[coset_representatives]]
+basis_change = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+origin_shift = [0.0, 0.0, 0.0]
+[[coset_representatives]]  # glide
+basis_change = [[1, 0, 0], [0, -1, 0], [0, 0, 1]]
+origin_shift = [0.0, 0.0, 0.5]
+
+[wycksplit]
+"4g" = {"2i1" = 0, "2i2" = 1}
+"2f" = {"2i1" = 0}
+"2e" = {"2i1" = 0}
+"2d" = {"1d1" = 0, "1f1" = 1}
+"2c" = {"1c1" = 0, "1g1" = 1}
+"2b" = {"1e1" = 0, "1h1" = 1}
+"2a" = {"1a1" = 0, "1b1" = 1}
