@@ -1,4 +1,4 @@
-"""Convert `atoms_conventional.csv`."""
+"""Convert `atoms_conventional.csv` for the subgroup."""
 
 import string
 import tomllib
@@ -17,46 +17,43 @@ def parse_wycksplit(d: dict) -> dict:
     return d
 
 
-def convert():
+def convert() -> None:
+    """Convert `atoms_conventional.csv` for the subgroup."""
     cell = np.loadtxt("../cell.dat")
 
     with open("wycksplit.toml", "rb") as f:
-        mapping = tomllib.load(f)
-    mapping = parse_wycksplit(mapping)
+        wycksplit = tomllib.load(f)
+    wycksplit = parse_wycksplit(wycksplit)
 
     df = pd.read_csv("../atoms_conventional.csv", skipinitialspace=True)
 
-    cell = (cell.T @ mapping["basis_change"]).T
+    cell = (cell.T @ wycksplit["basis_change"]).T
 
     np.savetxt("cell.dat", cell, fmt="%24.18f")
 
-    symbols = []
-    wyckoffs = []
-    wyckoffs_orig = []
-    basis = []
-    for i, s in df.iterrows():
-        for wyckoff, d in mapping["wycksplit"][s["wyckoff"]].items():
-            symbols.append(s["symbol"])
-            wyckoffs.append(wyckoff.rstrip(string.digits))
-            wyckoffs_orig.append(s["wyckoff"])
+    ds = []
+    for _, s in df.iterrows():
+        for wyckoff, op in wycksplit["wycksplit"][s["wyckoff"]].items():
+            d = {}
+            d["symbol"] = s["symbol"]
+            d["wyckoff"] = wyckoff.rstrip(string.digits)
+            d["wyckoff_orig"] = s["wyckoff"]
 
             # representative for split wyckoff sites
             xyz = s[["x", "y", "z"]].to_numpy(float)
-            basis.append(d["basis_change"] @ xyz + d["origin_shift"])
+            xyz = op["basis_change"] @ xyz + op["origin_shift"]
+            d["x"], d["y"], d["z"] = xyz
 
-    basis = np.array(basis) - mapping["origin_shift"]
-    basis = (np.linalg.inv(mapping["basis_change"]) @ basis.T).T
-    basis -= np.rint(basis)
+            ds.append(d)
 
-    d = {
-        "symbol": symbols,
-        "wyckoff": wyckoffs,
-        "wyckoff_orig": wyckoffs_orig,
-        "x": basis[:, 0].tolist(),
-        "y": basis[:, 1].tolist(),
-        "z": basis[:, 2].tolist(),
-    }
-    df = pd.DataFrame(d)
+    df = pd.DataFrame(ds)
+
+    # change coordinates for subgroup
+    xyzs = df[["x", "y", "z"]].to_numpy() - wycksplit["origin_shift"]
+    xyzs = (np.linalg.inv(wycksplit["basis_change"]) @ xyzs.T).T
+    xyzs -= np.rint(xyzs)
+    df[["x", "y", "z"]] = xyzs
+
     df = format_df(df)
     filename = "atoms_conventional.csv"
     df.to_csv(filename, float_format="%24.18f", index=False)
