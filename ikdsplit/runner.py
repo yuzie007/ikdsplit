@@ -1,5 +1,6 @@
 """Run recursively."""
 
+import argparse
 import pathlib
 import shutil
 import tomllib
@@ -20,14 +21,28 @@ def make_default_config() -> dict:
 
 
 def parse_config(config: dict) -> dict:
-    """Parse `ikdsplit.toml."""
+    """Parse `ikdsplit.toml`."""
     if config["sort"]["reference"] is not None:
         path = pathlib.Path(config["sort"]["reference"])
         config["sort"]["reference"] = path.resolve()
     return config
 
 
-def print_group(group: int, level: int):
+def write_config(config: dict) -> None:
+    """Write `ikdsplit.toml` for subgroup."""
+    space_group_number = config["space_group_number"]
+    with pathlib.Path("ikdsplit.toml").open("w", encoding="utf-8") as f:
+        f.write(f"space_group_number = {space_group_number:d}\n")
+        f.write("\n")
+
+        f.write("[fill]\n")
+        for k, v in config["fill"].items():
+            r = repr(v)
+            f.write(f"{k} = {r}\n")
+
+
+def print_group(group: int, level: int) -> None:
+    """Print group with indent."""
     s = ""
     if level > 1:
         s += "   " * (level - 1)
@@ -37,14 +52,15 @@ def print_group(group: int, level: int):
     print(s)
 
 
-def write_wycksplit_toml_orig(group: int):
+def write_wycksplit_toml_orig(group: int) -> None:
+    """Write `wycksplit.toml` for the parent group."""
     s = f"""\
 space_group_number_sup = {group}
 space_group_number_sub = {group}
 basis_change = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
 origin_shift = [0.0, 0.0, 0.0]
 """
-    with open("wycksplit.toml", "w", encoding="utf-8") as f:
+    with pathlib.Path("wycksplit.toml").open("w", encoding="utf-8") as f:
         f.write(s)
 
 
@@ -71,6 +87,8 @@ def recur(
             shutil.copy2("../atoms_conventional.csv", ".")
             shutil.copy2("../cell.dat", ".")
 
+        write_config(config | {"space_group_number": group})
+
         fill(config["fill"])
 
         d = config["regress"]
@@ -90,13 +108,14 @@ def recur(
 def start(max_level: int = 1) -> None:
     """Start calculations."""
     config = make_default_config()
-    with open("ikdsplit.toml", "rb") as f:
+    with pathlib.Path("ikdsplit.toml").open("rb") as f:
         config.update(tomllib.load(f))
     config = parse_config(config)
     recur(config, None, config["space_group_number"], 0, max_level)
 
 
-def add_arguments(parser):
+def add_arguments(parser: argparse.ArgumentParser) -> None:
+    """Add arguments."""
     parser.add_argument(
         "-l",
         "--level",
@@ -106,5 +125,6 @@ def add_arguments(parser):
     )
 
 
-def run(args):
+def run(args: argparse.Namespace) -> None:
+    """Run."""
     start(args.level)
