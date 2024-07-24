@@ -71,8 +71,7 @@ def recur(
             shutil.copy2("../atoms_conventional.csv", ".")
             shutil.copy2("../cell.dat", ".")
 
-        d = config["fill"]
-        fill(d["always"], d["never"], d["selected"])
+        fill(config["fill"])
 
         d = config["regress"]
         regress(d["transformations"])
