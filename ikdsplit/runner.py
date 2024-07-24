@@ -89,7 +89,7 @@ def recur(
 
         write_config(config | {"space_group_number": group})
 
-        fill(config["fill"])
+        fill(group, config["fill"])
 
         d = config["regress"]
         regress(d["transformations"])

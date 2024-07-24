@@ -84,22 +84,19 @@ def make_images(
     return images, pd.DataFrame(ds)
 
 
-def fill(mapping: dict[str, list[str]]) -> None:
+def fill(spacegroup: int, mapping: dict[str, list[str]]) -> None:
     """Fill atoms acoording to `atoms_conventional.csv`.
 
     Parameters
     ----------
+    spacegroup : int
+        Space group number.
     mapping : dict[str, list[str]]
         Mapping between symbols.
         If `{"H": ["H", "X"]}`, "H" is mapped to either "H" or "X" (vacancy).
 
     """
     cell = np.loadtxt("cell.dat")
-
-    with pathlib.Path("wycksplit.toml").open("rb") as f:
-        wycksplit = tomllib.load(f)
-
-    spacegroup = wycksplit["space_group_number_sub"]
 
     df = pd.read_csv("atoms_conventional.csv", skipinitialspace=True)
     df = index_wyckoff(df)
@@ -127,5 +124,4 @@ def run(args: argparse.Namespace) -> None:
     """Run."""
     with pathlib.Path("ikdsplit.toml").open("rb") as f:
         d = tomllib.load(f)
-    mapping = d["fill"]
-    fill(mapping)
+    fill(d["space_group_number"], d["fill"])
