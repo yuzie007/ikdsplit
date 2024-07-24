@@ -116,7 +116,7 @@ def regress(transformations: list):
     df = pd.read_csv("info_conventional.csv", skipinitialspace=True)
     ds = []
     for d in df.to_dict(orient="records"):
-        index = d["index"]
+        index = d["configuration"]
         fin = f"PPOSCAR-{index:09d}"
         fout = f"RPOSCAR-{index:09d}"
         atoms = ase.io.read(fin)

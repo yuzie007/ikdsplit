@@ -5,7 +5,7 @@
 Published version:
 
 ```bash
-pip install git+https://github.com/yuzie007/ikdsplit.git@v0.1.0
+pip install git+https://github.com/yuzie007/ikdsplit.git@0.2.0
 ```
 
 Development version:
@@ -31,10 +31,10 @@ pip install -e .
 `atoms_conventional.csv`
 
 ```csv
-symbol,wyckoff,x,y,z
-          Ti,          8a,    0.125000000000000000,    0.125000000000000000,    0.125000000000000000
-          Cr,         16d,    0.500000000000000000,    0.500000000000000000,    0.500000000000000000
-           H,         96g,    0.312500000000000000,    0.312500000000000000,    0.125000000000000000
+symbol,fill,wyckoff,x,y,z
+    Ti,    Ti,    8a,    0.125000000000000000,    0.125000000000000000,    0.125000000000000000
+    Cr,    Cr,   16d,    0.500000000000000000,    0.500000000000000000,    0.500000000000000000
+     H,     H,   96g,    0.312500000000000000,    0.312500000000000000,    0.125000000000000000
 ```
 
 `ikdsplit.toml`
@@ -43,9 +43,9 @@ symbol,wyckoff,x,y,z
 space_group_number = 227
 
 [fill]
-always = ["Ti", "Cr"]
-never = []
-selected = ["H"]
+Ti = ["Ti"]
+Cr = ["Cr"]
+H = ["H", "X"]
 
 [[regress.transformations]]  # origin choice 2 -> 1
 basis_change = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]

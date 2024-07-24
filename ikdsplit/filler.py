@@ -3,13 +3,14 @@ import tomllib
 
 import numpy as np
 import pandas as pd
-from ase.spacegroup import crystal, get_spacegroup
 from ase import Atoms
+from ase.spacegroup import crystal, get_spacegroup
 
 
-def add_labels(df: pd.DataFrame) -> pd.DataFrame:
-    tmp = df.groupby(["symbol", "wyckoff"]).cumcount() + 1
-    df["label"] = df["symbol"] + "_" + df["wyckoff"] + tmp.astype(str)
+def index_wyckoff(df: pd.DataFrame) -> pd.DataFrame:
+    """Index each site."""
+    tmp = df.groupby(["wyckoff"]).cumcount() + 1
+    df["wyckoff"] += tmp.astype(str)
     return df
 
 
@@ -19,11 +20,13 @@ def make_atoms(
     cell: np.ndarray,
     primitive: bool,
 ):
+    """Make `Atoms` based on `atoms_conventional.csv` and `fill`."""
     # hexagonal cell (consistent with Bilbao) for rhombohedral space groups
     setting = 1 if (3 <= spacegroup <= 15 or 143 <= spacegroup <= 194) else 2
 
-    symbols = df["symbol"].str.strip().values
-    basis = df[["x", "y", "z"]]
+    included = df["symbol"] != "X"  # remove vacancies
+    symbols = df[included]["symbol"].str.strip().to_numpy()
+    basis = df[included][["x", "y", "z"]]
     try:
         atoms = crystal(
             symbols,
@@ -49,58 +52,42 @@ def make_images(
     spacegroup: int,
     cell: np.ndarray,
     primitive: bool,
-    choices: list[list[bool]],
-) -> list[Atoms]:
+    mapping: dict[str, list[str]],
+) -> tuple[list[Atoms], pd.DataFrame]:
+    """Make all possible `Atoms`."""
     symbols = df["symbol"].unique()
+    mappings = [mapping[_] for _ in df["fill"]]
+
     images = []
     ds = []
     i = -1
-    for included in itertools.product(*choices):
+    filled: list[str]
+    for filled in itertools.product(*mappings):
         i += 1
-        df_included = df[list(included)]
+        df_included = df.copy()
+        df_included["symbol"] = filled
         atoms = make_atoms(df_included, spacegroup, cell, primitive)
         images.append(atoms)
         d = {}
-        d["index"] = i
+        d["configuration"] = i
         d["space_group_number"] = get_spacegroup(atoms).todict()["number"]
         d.update({symbol: atoms.symbols.count(symbol) for symbol in symbols})
-        d.update(dict(zip(df["label"], included, strict=True)))
+        d.update(dict(zip(df["wyckoff"], filled, strict=True)))
         ds.append(d)
 
     return images, pd.DataFrame(ds)
 
 
-def make_choices(
-    df: pd.DataFrame,
-    always: list[str],
-    never: list[str],
-    selected: list[str],
-) -> list[list[bool]]:
-    choices = []
-    for _, row in df.iterrows():
-        if row["symbol"] in always:
-            choices.append([True])
-        elif row["symbol"] in never:
-            choices.append([False])
-        elif row["symbol"] in selected:
-            choices.append([True, False])
-        else:
-            raise RuntimeError
-    return choices
-
-
-def fill(always: list[str], never: list[str], selected: list[str]):
+def fill(mapping: dict[str, list[str]]) -> None:
     cell = np.loadtxt("cell.dat")
 
     with open("wycksplit.toml", "rb") as f:
-        mapping = tomllib.load(f)
+        wycksplit = tomllib.load(f)
 
-    spacegroup = mapping["space_group_number_sub"]
+    spacegroup = wycksplit["space_group_number_sub"]
 
     df = pd.read_csv("atoms_conventional.csv", skipinitialspace=True)
-    df = add_labels(df)
-
-    choices = make_choices(df, always, never, selected)
+    df = index_wyckoff(df)
 
     for primitive in [False, True]:
         images, df_tmp = make_images(
@@ -108,7 +95,7 @@ def fill(always: list[str], never: list[str], selected: list[str]):
             spacegroup,
             cell,
             primitive=primitive,
-            choices=choices,
+            mapping=mapping,
         )
         for i, atoms in enumerate(images):
             fn = f"PPOSCAR-{i:09d}" if primitive else f"CPOSCAR-{i:09d}"
@@ -118,25 +105,11 @@ def fill(always: list[str], never: list[str], selected: list[str]):
 
 
 def add_arguments(parser):
-    parser.add_argument(
-        "--always",
-        nargs="+",
-        default=[],
-        help="symbols always included",
-    )
-    parser.add_argument(
-        "--never",
-        nargs="+",
-        default=[],
-        help="symbols never included",
-    )
-    parser.add_argument(
-        "--selected",
-        nargs="+",
-        default=[],
-        help="symbols selected",
-    )
+    pass
 
 
 def run(args):
-    fill(args.always, args.never, args.selected)
+    with open("ikdsplit.toml", "rb") as f:
+        d = tomllib.load(f)
+    mapping = d["fill"]
+    fill(mapping)

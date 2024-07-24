@@ -20,7 +20,7 @@ def cd(path: str | pathlib.Path) -> typing.Generator:
         Path to directory.
 
     """
-    cwd = os.getcwd()
+    cwd = pathlib.Path.cwd()
     os.chdir(path)
     try:
         yield
@@ -29,9 +29,10 @@ def cd(path: str | pathlib.Path) -> typing.Generator:
 
 
 def format_df(df: pd.DataFrame) -> pd.DataFrame:
+    """Format `atoms_XXX.csv`."""
     for k in df.columns:
         if df[k].dtype == object:
-            df[k] = df[k].str.pad(12)
+            df[k] = df[k].str.pad(6)
     return df
 
 

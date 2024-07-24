@@ -36,6 +36,7 @@ def convert() -> None:
         for wyckoff, op in wycksplit["wycksplit"][s["wyckoff"]].items():
             d = {}
             d["symbol"] = s["symbol"]
+            d["fill"] = s["fill"]
             d["wyckoff"] = wyckoff.rstrip(string.digits)
             d["wyckoff_orig"] = s["wyckoff"]
 
