@@ -71,14 +71,14 @@ origin_shift = [0.0, 0.0, 0.0]
         f.write(s)
 
 
-def recur(
+def recur_prepare(
     config: dict,
     supergroup: int,
     group: int,
     level: int,
     max_level: int,
 ) -> None:
-    """Run each subgroup recursively."""
+    """Prepare each subgroup recursively."""
     print_group(group, level)
 
     src = pathlib.Path(__file__).parent / "database"
@@ -96,6 +96,24 @@ def recur(
 
         write_config(config | {"space_group_number": group})
 
+        subgroups = get_subgroups(group)
+        for subgroup in subgroups:
+            recur_prepare(config, group, subgroup, level + 1, max_level)
+
+
+def recur_run(
+    config: dict,
+    supergroup: int,
+    group: int,
+    level: int,
+    max_level: int,
+) -> None:
+    """Run each subgroup recursively."""
+    print_group(group, level)
+
+    dn = pathlib.Path(f"{group:03d}")
+    dn.mkdir(parents=True, exist_ok=True)
+    with cd(dn):
         fill(group, config["fill"])
 
         d = config["regress"]
@@ -109,7 +127,7 @@ def recur(
 
         subgroups = get_subgroups(group)
         for subgroup in subgroups:
-            recur(config, group, subgroup, level + 1, max_level)
+            recur_run(config, group, subgroup, level + 1, max_level)
 
 
 def start(max_level: int = 1) -> None:
@@ -118,7 +136,14 @@ def start(max_level: int = 1) -> None:
     with pathlib.Path("ikdsplit.toml").open("rb") as f:
         config.update(tomllib.load(f))
     config = parse_config(config)
-    recur(config, None, config["space_group_number"], 0, max_level)
+
+    print("prepare ...")
+    recur_prepare(config, None, config["space_group_number"], 0, max_level)
+    print()
+
+    print("run ...")
+    recur_run(config, None, config["space_group_number"], 0, max_level)
+    print()
 
 
 def add_arguments(parser: argparse.ArgumentParser) -> None:
