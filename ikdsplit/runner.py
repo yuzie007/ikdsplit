@@ -41,8 +41,8 @@ def write_config(config: dict) -> None:
             f.write(f"{k} = {r}\n")
         f.write("\n")
 
-        f.write("[[regress.transformations]]\n")
         for transformation in config["regress"]["transformations"]:
+            f.write("[[regress.transformations]]\n")
             for k, v in transformation.items():
                 r = repr(v)
                 f.write(f"{k} = {r}\n")
