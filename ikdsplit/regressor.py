@@ -135,9 +135,10 @@ def regress(transformations: list) -> None:
 
 def add_arguments(parser: argparse.ArgumentParser) -> None:
     """Add arguments."""
-    parser.add_argument("--transformations")
 
 
 def run(args: argparse.Namespace) -> None:
     """Run."""
-    regress(args.transformations)
+    with pathlib.Path("ikdsplit.toml").open("rb") as f:
+        d = tomllib.load(f)
+    regress(d["regress"]["transformations"])

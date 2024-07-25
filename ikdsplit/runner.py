@@ -39,6 +39,13 @@ def write_config(config: dict) -> None:
         for k, v in config["fill"].items():
             r = repr(v)
             f.write(f"{k} = {r}\n")
+        f.write("\n")
+
+        f.write("[[regress.transformations]]\n")
+        for transformation in config["regress"]["transformations"]:
+            for k, v in transformation.items():
+                r = repr(v)
+                f.write(f"{k} = {r}\n")
 
 
 def print_group(group: int, level: int) -> None:
