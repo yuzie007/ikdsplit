@@ -9,7 +9,7 @@ import pytest
 from ikdsplit.utils import cd
 
 
-@pytest.mark.parametrize("data_path", ["227", "002"])
+@pytest.mark.parametrize("data_path", ["002", "227"])
 def test_run(data_path, tmp_path) -> None:
     """Test `run`."""
     src = pathlib.Path(__file__).parent / "testdata" / data_path
