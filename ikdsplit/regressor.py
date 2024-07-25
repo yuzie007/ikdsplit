@@ -12,6 +12,7 @@ from ase import Atoms
 from ase.build import make_supercell
 from ase.spacegroup.crystal_data import _lattice_centering
 
+from ikdsplit.io import parse_config
 from ikdsplit.spacegroup import multiply
 from ikdsplit.utils import format_df
 
@@ -51,8 +52,8 @@ def cumulate_coordinate_change() -> tuple[np.ndarray, np.ndarray]:
         origin_shift_first = np.array([0.0, 0.0, 0.0])
         ops.append((basis_change_first, origin_shift_first))
 
-    with pathlib.Path("ikdsplit.toml").open("rb") as f:
-        config = tomllib.load(f)
+    config = parse_config()
+
     ops_last = [
         (np.array(_["basis_change"]), np.array(_["origin_shift"]))
         for _ in config["regress"]["transformations"]

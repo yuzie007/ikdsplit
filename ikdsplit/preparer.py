@@ -30,12 +30,18 @@ origin_shift = [0.0, 0.0, 0.0]
 def update_config(superconfig: dict) -> dict:
     """Update `config` for subgroup."""
     config = copy.deepcopy(superconfig)
+
     with pathlib.Path("wycksplit.toml").open("rb") as f:
         wycksplit = tomllib.load(f)
+
     config["space_group_number"] = wycksplit["space_group_number_sub"]
+
+    config["cell"] = (config["cell"].T @ wycksplit["basis_change"]).T
+
     op = invert(wycksplit["basis_change"], wycksplit["origin_shift"])
     op = {"basis_change": op[0].tolist(), "origin_shift": op[1].tolist()}
     config["regress"]["transformations"].insert(0, op)
+
     return config
 
 
@@ -68,7 +74,6 @@ def recur_prepare(
         else:
             write_wycksplit_toml_orig(group)
             shutil.copy2("../atoms_conventional.csv", ".")
-            shutil.copy2("../cell.dat", ".")
 
         config = update_config(superconfig)
 

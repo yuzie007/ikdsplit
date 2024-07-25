@@ -1,4 +1,6 @@
 space_group_number = 2
 
+cell = 1.0
+
 [fill]
 H = ['H']

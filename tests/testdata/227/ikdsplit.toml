@@ -1,5 +1,7 @@
 space_group_number = 227
 
+cell = 6.555923429801207014
+
 [fill]
 Ti = ['Ti']
 Cr = ['Cr']

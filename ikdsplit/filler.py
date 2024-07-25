@@ -2,13 +2,13 @@
 
 import argparse
 import itertools
-import pathlib
-import tomllib
 
 import numpy as np
 import pandas as pd
 from ase import Atoms
 from ase.spacegroup import crystal, get_spacegroup
+
+from ikdsplit.io import parse_config
 
 
 def index_wyckoff(df: pd.DataFrame) -> pd.DataFrame:
@@ -84,19 +84,9 @@ def make_images(
     return pd.DataFrame(ds)
 
 
-def fill(spacegroup: int, mapping: dict[str, list[str]]) -> None:
-    """Fill atoms acoording to `atoms_conventional.csv`.
-
-    Parameters
-    ----------
-    spacegroup : int
-        Space group number.
-    mapping : dict[str, list[str]]
-        Mapping between symbols.
-        If `{"H": ["H", "X"]}`, "H" is mapped to either "H" or "X" (vacancy).
-
-    """
-    cell = np.loadtxt("cell.dat")
+def fill() -> None:
+    """Fill atoms acoording to `atoms_conventional.csv`."""
+    config = parse_config()
 
     df = pd.read_csv("atoms_conventional.csv", skipinitialspace=True)
     df = index_wyckoff(df)
@@ -104,9 +94,9 @@ def fill(spacegroup: int, mapping: dict[str, list[str]]) -> None:
     for primitive in [False, True]:
         info = make_images(
             df,
-            spacegroup,
-            cell,
-            mapping=mapping,
+            config["space_group_number"],
+            config["cell"],
+            mapping=config["fill"],
             primitive=primitive,
         )
         fn = "info_primitive.csv" if primitive else "info_conventional.csv"
@@ -119,6 +109,4 @@ def add_arguments(parser: argparse.ArgumentParser) -> None:
 
 def run(args: argparse.Namespace) -> None:
     """Run."""
-    with pathlib.Path("ikdsplit.toml").open("rb") as f:
-        d = tomllib.load(f)
-    fill(d["space_group_number"], d["fill"])
+    fill()
