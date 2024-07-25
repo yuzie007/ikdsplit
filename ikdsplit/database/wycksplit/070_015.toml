@@ -1,0 +1,21 @@
+space_group_number_sup = 70
+space_group_number_sub = 15
+basis_change = [[0.0, 1.0, 0.0], [-1.0, 0.0, 0.5], [0.0, 0.0, 0.5]]
+origin_shift = [0.0, 0.0, 0.0]
+
+[[coset_representatives]]
+basis_change = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+origin_shift = [0.0, 0.0, 0.0]
+[[coset_representatives]]
+basis_change = [[1, 0, 0], [0, 1, 0], [0, 0, -1]]
+origin_shift = [0.25, 0.25, 0.0]
+
+[wycksplit]
+"32h" = {"8f1" = 0, "8f2" = 1}
+"16g" = {"8f1" = 0}
+"16f" = {"8f1" = 0}
+"16e" = {"4e1" = 0, "4e2" = 1}
+"16d" = {"4b1" = 0, "4c1" = 1}
+"16c" = {"4a1" = 0, "4d1" = 1}
+"8b" = {"4e1" = 0}
+"8a" = {"4e1" = 0}
