@@ -1,16 +1,16 @@
-"""Module ikdtools"""
+"""ikdsplit."""
 
 import argparse
 
 import ikdsplit.converter
 import ikdsplit.filler
-import ikdsplit.runner
 import ikdsplit.regressor
+import ikdsplit.runner
 import ikdsplit.sorter
 
 
-def main():
-    """main"""
+def main() -> None:
+    """Command."""
     formatter_class = argparse.ArgumentDefaultsHelpFormatter
     parser = argparse.ArgumentParser(formatter_class=formatter_class)
     subparsers = parser.add_subparsers(dest="command")
