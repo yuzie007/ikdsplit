@@ -55,3 +55,27 @@ def get_subgroups(group: int) -> list[int]:
     fns = [_ for _ in fns if _.endswith(".toml")]
     fns = [_ for _ in fns if _.startswith(f"{group:03d}")]
     return sorted([int(fn.split(".")[0].split("_")[1]) for fn in fns])
+
+
+def print_group(group: int, level: int, *args: tuple, **kwargs: dict) -> None:
+    """Print group with indent.
+
+    Parameters
+    ----------
+    group : int
+        Space group number.
+    level : int
+        Level of indent.
+    *args
+        Positional arguments passed to `print`.
+    **kwargs
+        Keyword arguments passed to `print`.
+
+    """
+    s = ""
+    if level > 1:
+        s += "   " * (level - 1)
+    if level > 0:
+        s += "-> "
+    s += f"{group:03d}"
+    print(s, *args, **kwargs)
