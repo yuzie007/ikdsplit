@@ -1,4 +1,8 @@
+"""Fill."""
+
+import argparse
 import itertools
+import pathlib
 import tomllib
 
 import numpy as np
@@ -18,8 +22,9 @@ def make_atoms(
     df: pd.DataFrame,
     spacegroup: int,
     cell: np.ndarray,
-    primitive: bool,
-):
+    *,
+    primitive: bool = False,
+) -> Atoms:
     """Make `Atoms` based on `atoms_conventional.csv` and `fill`."""
     # hexagonal cell (consistent with Bilbao) for rhombohedral space groups
     setting = 1 if (3 <= spacegroup <= 15 or 143 <= spacegroup <= 194) else 2
@@ -51,8 +56,9 @@ def make_images(
     df: pd.DataFrame,
     spacegroup: int,
     cell: np.ndarray,
-    primitive: bool,
     mapping: dict[str, list[str]],
+    *,
+    primitive: bool = False,
 ) -> tuple[list[Atoms], pd.DataFrame]:
     """Make all possible `Atoms`."""
     symbols = df["symbol"].unique()
@@ -66,7 +72,7 @@ def make_images(
         i += 1
         df_included = df.copy()
         df_included["symbol"] = filled
-        atoms = make_atoms(df_included, spacegroup, cell, primitive)
+        atoms = make_atoms(df_included, spacegroup, cell, primitive=primitive)
         images.append(atoms)
         d = {}
         d["configuration"] = i
@@ -78,13 +84,19 @@ def make_images(
     return images, pd.DataFrame(ds)
 
 
-def fill(mapping: dict[str, list[str]]) -> None:
+def fill(spacegroup: int, mapping: dict[str, list[str]]) -> None:
+    """Fill atoms acoording to `atoms_conventional.csv`.
+
+    Parameters
+    ----------
+    spacegroup : int
+        Space group number.
+    mapping : dict[str, list[str]]
+        Mapping between symbols.
+        If `{"H": ["H", "X"]}`, "H" is mapped to either "H" or "X" (vacancy).
+
+    """
     cell = np.loadtxt("cell.dat")
-
-    with open("wycksplit.toml", "rb") as f:
-        wycksplit = tomllib.load(f)
-
-    spacegroup = wycksplit["space_group_number_sub"]
 
     df = pd.read_csv("atoms_conventional.csv", skipinitialspace=True)
     df = index_wyckoff(df)
@@ -94,8 +106,8 @@ def fill(mapping: dict[str, list[str]]) -> None:
             df,
             spacegroup,
             cell,
-            primitive=primitive,
             mapping=mapping,
+            primitive=primitive,
         )
         for i, atoms in enumerate(images):
             fn = f"PPOSCAR-{i:09d}" if primitive else f"CPOSCAR-{i:09d}"
@@ -104,12 +116,12 @@ def fill(mapping: dict[str, list[str]]) -> None:
         df_tmp.to_csv(fn, index=False)
 
 
-def add_arguments(parser):
-    pass
+def add_arguments(parser: argparse.ArgumentParser) -> None:
+    """Add arguments."""
 
 
-def run(args):
-    with open("ikdsplit.toml", "rb") as f:
+def run(args: argparse.Namespace) -> None:
+    """Run."""
+    with pathlib.Path("ikdsplit.toml").open("rb") as f:
         d = tomllib.load(f)
-    mapping = d["fill"]
-    fill(mapping)
+    fill(d["space_group_number"], d["fill"])

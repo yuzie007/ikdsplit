@@ -1,5 +1,7 @@
 """Convert `atoms_conventional.csv` for the subgroup."""
 
+import argparse
+import pathlib
 import string
 import tomllib
 
@@ -21,7 +23,7 @@ def convert() -> None:
     """Convert `atoms_conventional.csv` for the subgroup."""
     cell = np.loadtxt("../cell.dat")
 
-    with open("wycksplit.toml", "rb") as f:
+    with pathlib.Path("wycksplit.toml").open("rb") as f:
         wycksplit = tomllib.load(f)
     wycksplit = parse_wycksplit(wycksplit)
 
@@ -60,9 +62,9 @@ def convert() -> None:
     df.to_csv(filename, float_format="%24.18f", index=False)
 
 
-def add_arguments(parser):
+def add_arguments(parser: argparse.ArgumentParser) -> None:
     pass
 
 
-def run(args):
+def run(args: argparse.Namespace) -> None:
     convert()

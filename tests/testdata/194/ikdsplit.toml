@@ -1,0 +1,13 @@
+space_group_number = 194
+
+[fill]
+Ti = ['Ti']
+Cr = ['Cr']
+H = ['H', 'X']
+
+[[regress.transformations]]  # conventional -> 2x2x1 conventional
+basis_change = [[2, 0, 0], [0, 2, 0], [0, 0, 1]]
+origin_shift = [0.0, 0.0, 0.0]
+
+[sort]
+reference = "FPOSCAR"  # atoms are sorted in this order

@@ -1,5 +1,9 @@
+"""Regress to the original target supercell."""
+
+import argparse
 import functools
 import os
+import pathlib
 import tomllib
 
 import ase.io
@@ -32,8 +36,7 @@ def change_coordinates(
 ) -> tuple[Atoms, pd.DataFrame]:
     """Change the coordinate system."""
     atoms.set_scaled_positions(atoms.get_scaled_positions() - origin_shift)
-    atoms = make_supercell(atoms, basis_change.T, order="atom-major")
-    return atoms
+    return make_supercell(atoms, basis_change.T, order="atom-major")
 
 
 def invert(
@@ -76,8 +79,9 @@ def cumulate_coordinate_change(
     """Cumulate changes of the coordinate system in the application order."""
     ops = []
 
-    if os.path.isfile("wycksplit.toml"):
-        with open("wycksplit.toml", "rb") as f:
+    wycksplit_toml = pathlib.Path("wycksplit.toml")
+    if wycksplit_toml.is_file():
+        with wycksplit_toml.open("rb") as f:
             d = tomllib.load(f)
         basis_change_first = get_p2c(d["space_group_number_sub"])
         origin_shift_first = np.array([0.0, 0.0, 0.0])
@@ -88,7 +92,7 @@ def cumulate_coordinate_change(
         fn = "wycksplit.toml" if not fn else os.path.join("..", fn)
         if not os.path.isfile(fn):
             break
-        with open(fn, "rb") as f:
+        with pathlib.Path(fn).open("rb") as f:
             d = tomllib.load(f)
         ops.append(invert(d["basis_change"], d["origin_shift"]))
 
@@ -102,7 +106,8 @@ def cumulate_coordinate_change(
     return functools.reduce(multiply, ops)
 
 
-def regress(transformations: list):
+def regress(transformations: list) -> None:
+    """Regress to the original target supercell."""
     basis_change, origin_shift = cumulate_coordinate_change(transformations)
 
     # calculate atomic positions in the target supercell
@@ -128,9 +133,12 @@ def regress(transformations: list):
     df.to_csv("info_regressed.csv", index=False)
 
 
-def add_arguments(parser):
-    parser.add_argument("--transformations")
+def add_arguments(parser: argparse.ArgumentParser) -> None:
+    """Add arguments."""
 
 
-def run(args):
-    regress(args.transformations)
+def run(args: argparse.Namespace) -> None:
+    """Run."""
+    with pathlib.Path("ikdsplit.toml").open("rb") as f:
+        d = tomllib.load(f)
+    regress(d["regress"]["transformations"])

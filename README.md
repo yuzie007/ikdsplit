@@ -43,9 +43,9 @@ symbol,fill,wyckoff,x,y,z
 space_group_number = 227
 
 [fill]
-Ti = ["Ti"]
-Cr = ["Cr"]
-H = ["H", "X"]
+Ti = ['Ti']
+Cr = ['Cr']
+H = ['H', 'X']
 
 [[regress.transformations]]  # origin choice 2 -> 1
 basis_change = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
