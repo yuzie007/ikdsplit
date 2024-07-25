@@ -59,21 +59,21 @@ def make_images(
     mapping: dict[str, list[str]],
     *,
     primitive: bool = False,
-) -> tuple[list[Atoms], pd.DataFrame]:
+) -> pd.DataFrame:
     """Make all possible `Atoms`."""
     symbols = df["symbol"].unique()
     mappings = [mapping[_] for _ in df["symbol"]]
 
-    images = []
     ds = []
-    i = -1
     filled: list[str]
-    for filled in itertools.product(*mappings):
-        i += 1
+    for i, filled in enumerate(itertools.product(*mappings)):
         df_included = df.copy()
         df_included["symbol"] = filled
         atoms = make_atoms(df_included, spacegroup, cell, primitive=primitive)
-        images.append(atoms)
+
+        fn = f"PPOSCAR-{i:09d}" if primitive else f"CPOSCAR-{i:09d}"
+        atoms.write(fn, direct=True)
+
         d = {}
         d["configuration"] = i
         d["space_group_number"] = get_spacegroup(atoms).todict()["number"]
@@ -81,7 +81,7 @@ def make_images(
         d.update(dict(zip(df["wyckoff"], filled, strict=True)))
         ds.append(d)
 
-    return images, pd.DataFrame(ds)
+    return pd.DataFrame(ds)
 
 
 def fill(spacegroup: int, mapping: dict[str, list[str]]) -> None:
@@ -102,18 +102,15 @@ def fill(spacegroup: int, mapping: dict[str, list[str]]) -> None:
     df = index_wyckoff(df)
 
     for primitive in [False, True]:
-        images, df_tmp = make_images(
+        info = make_images(
             df,
             spacegroup,
             cell,
             mapping=mapping,
             primitive=primitive,
         )
-        for i, atoms in enumerate(images):
-            fn = f"PPOSCAR-{i:09d}" if primitive else f"CPOSCAR-{i:09d}"
-            atoms.write(fn, direct=True)
         fn = "info_primitive.csv" if primitive else "info_conventional.csv"
-        df_tmp.to_csv(fn, index=False)
+        info.to_csv(fn, index=False)
 
 
 def add_arguments(parser: argparse.ArgumentParser) -> None:
