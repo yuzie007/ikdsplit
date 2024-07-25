@@ -1,9 +1,12 @@
 """Run recursively."""
 
 import argparse
+import math
 import pathlib
 import shutil
 import tomllib
+
+import pandas as pd
 
 from ikdsplit.converter import convert
 from ikdsplit.filler import fill
@@ -48,15 +51,28 @@ def write_config(config: dict) -> None:
                 f.write(f"{k} = {r}\n")
 
 
-def print_group(group: int, level: int) -> None:
-    """Print group with indent."""
+def print_group(group: int, level: int, *args: tuple, **kwargs: dict) -> None:
+    """Print group with indent.
+
+    Parameters
+    ----------
+    group : int
+        Space group number.
+    level : int
+        Level of indent.
+    *args
+        Positional arguments passed to `print`.
+    **kwargs
+        Keyword arguments passed to `print`.
+
+    """
     s = ""
     if level > 1:
         s += "   " * (level - 1)
     if level > 0:
         s += "-> "
     s += f"{group:03d}"
-    print(s)
+    print(s, *args, **kwargs)
 
 
 def write_wycksplit_toml_orig(group: int) -> None:
@@ -71,6 +87,14 @@ origin_shift = [0.0, 0.0, 0.0]
         f.write(s)
 
 
+def count_configurations() -> int:
+    """Count number of atomic configurations."""
+    with pathlib.Path("ikdsplit.toml").open("rb") as f:
+        config = tomllib.load(f)
+    df = pd.read_csv("atoms_conventional.csv", skipinitialspace=True)
+    return math.prod([len(config["fill"][_]) for _ in df["symbol"]])
+
+
 def recur_prepare(
     config: dict,
     supergroup: int,
@@ -79,7 +103,7 @@ def recur_prepare(
     max_level: int,
 ) -> None:
     """Prepare each subgroup recursively."""
-    print_group(group, level)
+    print_group(group, level, end=" ")
 
     src = pathlib.Path(__file__).parent / "database"
     dn = pathlib.Path(f"{group:03d}")
@@ -95,6 +119,8 @@ def recur_prepare(
             shutil.copy2("../cell.dat", ".")
 
         write_config(config | {"space_group_number": group})
+
+        print(f"({count_configurations()} configurations)")
 
         subgroups = get_subgroups(group)
         for subgroup in subgroups:
