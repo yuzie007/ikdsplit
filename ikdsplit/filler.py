@@ -62,7 +62,7 @@ def make_images(
 ) -> tuple[list[Atoms], pd.DataFrame]:
     """Make all possible `Atoms`."""
     symbols = df["symbol"].unique()
-    mappings = [mapping[_] for _ in df["fill"]]
+    mappings = [mapping[_] for _ in df["symbol"]]
 
     images = []
     ds = []
