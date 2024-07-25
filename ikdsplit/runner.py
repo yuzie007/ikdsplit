@@ -27,8 +27,7 @@ def recur_run(
     with cd(dn):
         fill(group, config["fill"])
 
-        d = config["regress"]
-        regress(d["transformations"])
+        regress()
 
         d = config["sort"]
         sort_all(d["reference"])

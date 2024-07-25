@@ -2,7 +2,6 @@
 
 import argparse
 import functools
-import os
 import pathlib
 import tomllib
 
@@ -13,7 +12,7 @@ from ase import Atoms
 from ase.build import make_supercell
 from ase.spacegroup.crystal_data import _lattice_centering
 
-from ikdsplit.spacegroup import invert, multiply
+from ikdsplit.spacegroup import multiply
 from ikdsplit.utils import format_df
 
 
@@ -40,9 +39,7 @@ def change_coordinates(
     return make_supercell(atoms, basis_change.T, order="atom-major")
 
 
-def cumulate_coordinate_change(
-    transformations: list,
-) -> tuple[np.ndarray, np.ndarray]:
+def cumulate_coordinate_change() -> tuple[np.ndarray, np.ndarray]:
     """Cumulate changes of the coordinate system in the application order."""
     ops = []
 
@@ -54,28 +51,20 @@ def cumulate_coordinate_change(
         origin_shift_first = np.array([0.0, 0.0, 0.0])
         ops.append((basis_change_first, origin_shift_first))
 
-    fn = ""
-    while True:
-        fn = "wycksplit.toml" if not fn else os.path.join("..", fn)
-        if not os.path.isfile(fn):
-            break
-        with pathlib.Path(fn).open("rb") as f:
-            d = tomllib.load(f)
-        ops.append(invert(d["basis_change"], d["origin_shift"]))
-
-    if transformations:
-        ops_last = [
-            (np.array(_["basis_change"]), np.array(_["origin_shift"]))
-            for _ in transformations
-        ]
-        ops.extend(ops_last)
+    with pathlib.Path("ikdsplit.toml").open("rb") as f:
+        config = tomllib.load(f)
+    ops_last = [
+        (np.array(_["basis_change"]), np.array(_["origin_shift"]))
+        for _ in config["regress"]["transformations"]
+    ]
+    ops.extend(ops_last)
 
     return functools.reduce(multiply, ops)
 
 
-def regress(transformations: list) -> None:
+def regress() -> None:
     """Regress to the original target supercell."""
-    basis_change, origin_shift = cumulate_coordinate_change(transformations)
+    basis_change, origin_shift = cumulate_coordinate_change()
 
     # calculate atomic positions in the target supercell
     df = pd.read_csv("atoms_conventional.csv", skipinitialspace=True)
@@ -106,6 +95,4 @@ def add_arguments(parser: argparse.ArgumentParser) -> None:
 
 def run(args: argparse.Namespace) -> None:
     """Run."""
-    with pathlib.Path("ikdsplit.toml").open("rb") as f:
-        d = tomllib.load(f)
-    regress(d["regress"]["transformations"])
+    regress()
