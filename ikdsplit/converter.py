@@ -43,7 +43,7 @@ def convert() -> None:
 
             # representative for split wyckoff sites
             xyz = s[["x", "y", "z"]].to_numpy(float)
-            xyz = op["basis_change"] @ xyz + op["origin_shift"]
+            xyz = op["rotation"] @ xyz + op["translation"]
             d["x"], d["y"], d["z"] = xyz
 
             ds.append(d)
