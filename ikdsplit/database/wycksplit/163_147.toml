@@ -4,11 +4,11 @@ basis_change = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
 origin_shift = [0.0, 0.0, 0.0]
 
 [[coset_representatives]]
-basis_change = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
-origin_shift = [0.0, 0.0, 0.0]
+rotation = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+translation = [0.0, 0.0, 0.0]
 [[coset_representatives]]
-basis_change = [[0, 1, 0], [1, 0, 0], [0, 0, 1]]
-origin_shift = [0.0, 0.0, 0.5]
+rotation = [[0, 1, 0], [1, 0, 0], [0, 0, 1]]
+translation = [0.0, 0.0, 0.5]
 
 [wycksplit]
 "12i" = {"6g1" = 0, "6g2" = 1}

@@ -4,14 +4,14 @@ basis_change = [[0, 0, 1], [1, 0, 0], [0, 1, 0]]
 origin_shift = [0.0, 0.0, 0.0]
 
 [[coset_representatives]]  # (x, y, z)
-basis_change = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
-origin_shift = [0.0, 0.0, 0.0]
+rotation = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+translation = [0.0, 0.0, 0.0]
 [[coset_representatives]]  # (-y, x-y, z)
-basis_change = [[0, -1, 0], [1, -1, 0], [0, 0, 1]]
-origin_shift = [0.0, 0.0, 0.0]
+rotation = [[0, -1, 0], [1, -1, 0], [0, 0, 1]]
+translation = [0.0, 0.0, 0.0]
 [[coset_representatives]]  # (-x+y, -x, z)
-basis_change = [[-1, 1, 0], [-1, 0, 0], [0, 0, 1]]
-origin_shift = [0.0, 0.0, 0.0]
+rotation = [[-1, 1, 0], [-1, 0, 0], [0, 0, 1]]
+translation = [0.0, 0.0, 0.0]
 
 [wycksplit]
 "12i" = {"4f1" = 0, "4f2" = 1, "4f3" = 2}

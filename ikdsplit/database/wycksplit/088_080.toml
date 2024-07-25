@@ -1,7 +1,7 @@
-space_group_number_sup = 13
-space_group_number_sub = 3
+space_group_number_sup = 88
+space_group_number_sub = 80
 basis_change = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
-origin_shift = [0.0, 0.0, 0.25]
+origin_shift = [0.5, 0.25, 0.0]
 
 [[coset_representatives]]
 rotation = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
@@ -11,10 +11,9 @@ rotation = [[-1, 0, 0], [0, -1, 0], [0, 0, -1]]
 translation = [0.0, 0.0, 0.0]
 
 [wycksplit]
-"4g" = {"2e1" = 0, "2e2" = 1}
-"2f" = {"1c1" = 0, "1d1" = 1}
-"2e" = {"1a1" = 0, "1b1" = 1}
-"2d" = {"1e1" = 0}
-"2c" = {"2e1" = 0}
-"2b" = {"2e1" = 0}
-"2a" = {"2e1" = 0}
+"16f" = {"8b1" = 0, "8b2" = 1}
+"8e" = {"4a1" = 0, "4a2" = 1}
+"8d" = {"8b1" = 0}
+"8c" = {"8b1" = 0}
+"4b" = {"4a1" = 0}
+"4a" = {"4a1" = 0}

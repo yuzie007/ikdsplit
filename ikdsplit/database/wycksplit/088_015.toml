@@ -1,6 +1,6 @@
-space_group_number_sup = 141
-space_group_number_sub = 74
-basis_change = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+space_group_number_sup = 88
+space_group_number_sub = 15
+basis_change = [[-1, 0, 0], [-1, 0, 1], [0, 1, 0]]
 origin_shift = [0.0, 0.0, 0.0]
 
 [[coset_representatives]]
@@ -8,13 +8,10 @@ rotation = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
 translation = [0.0, 0.0, 0.0]
 [[coset_representatives]]  # screw
 rotation = [[0, -1, 0], [1, 0, 0], [0, 0, 1]]
-translation = [0.25, 0.75, 0.25]
+translation = [-0.25, 0.25, 0.25]
 
 [wycksplit]
-"32i" = {"16j1" = 0, "16j2" = 1}
-"16h" = {"8h1" = 0, "8i1" = 1}
-"16g" = {"16j1" = 0}
-"16f" = {"8f1" = 0, "8g1" = 1}
+"16f" = {"8f1" = 0, "8f2" = 1}
 "8e" = {"4e1" = 0, "4e2" = 1}
 "8d" = {"4b1" = 0, "4c1" = 1}
 "8c" = {"4a1" = 0, "4d1" = 1}
