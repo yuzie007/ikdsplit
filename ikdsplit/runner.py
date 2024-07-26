@@ -2,7 +2,6 @@
 
 import argparse
 import pathlib
-import tomllib
 
 from ikdsplit.filler import fill
 from ikdsplit.io import make_default_config, parse_config
@@ -25,10 +24,9 @@ def recur_run(
     dn = pathlib.Path(f"{group:03d}")
     dn.mkdir(parents=True, exist_ok=True)
     with cd(dn):
-        fill(group, config["fill"])
+        fill()
 
-        d = config["regress"]
-        regress(d["transformations"])
+        regress()
 
         d = config["sort"]
         sort_all(d["reference"])
@@ -44,9 +42,7 @@ def recur_run(
 def start(max_level: int = 1) -> None:
     """Start calculations."""
     config = make_default_config()
-    with pathlib.Path("ikdsplit.toml").open("rb") as f:
-        config.update(tomllib.load(f))
-    config = parse_config(config)
+    config.update(parse_config())
 
     print("prepare ...")
     recur_prepare(config, None, config["space_group_number"], 0, max_level)

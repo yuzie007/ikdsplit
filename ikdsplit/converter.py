@@ -21,17 +21,11 @@ def parse_wycksplit(d: dict) -> dict:
 
 def convert() -> None:
     """Convert `atoms_conventional.csv` for the subgroup."""
-    cell = np.loadtxt("../cell.dat")
-
     with pathlib.Path("wycksplit.toml").open("rb") as f:
         wycksplit = tomllib.load(f)
     wycksplit = parse_wycksplit(wycksplit)
 
     df = pd.read_csv("../atoms_conventional.csv", skipinitialspace=True)
-
-    cell = (cell.T @ wycksplit["basis_change"]).T
-
-    np.savetxt("cell.dat", cell, fmt="%24.18f")
 
     ds = []
     for _, s in df.iterrows():

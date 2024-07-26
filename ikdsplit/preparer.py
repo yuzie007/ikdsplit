@@ -1,6 +1,7 @@
 """Run recursively."""
 
 import argparse
+import copy
 import math
 import pathlib
 import shutil
@@ -10,6 +11,7 @@ import pandas as pd
 
 from ikdsplit.converter import convert
 from ikdsplit.io import make_default_config, parse_config, write_config
+from ikdsplit.spacegroup import invert
 from ikdsplit.utils import cd, get_subgroups, print_group
 
 
@@ -25,6 +27,24 @@ origin_shift = [0.0, 0.0, 0.0]
         f.write(s)
 
 
+def update_config(superconfig: dict) -> dict:
+    """Update `config` for subgroup."""
+    config = copy.deepcopy(superconfig)
+
+    with pathlib.Path("wycksplit.toml").open("rb") as f:
+        wycksplit = tomllib.load(f)
+
+    config["space_group_number"] = wycksplit["space_group_number_sub"]
+
+    config["cell"] = (config["cell"].T @ wycksplit["basis_change"]).T
+
+    op = invert(wycksplit["basis_change"], wycksplit["origin_shift"])
+    op = {"basis_change": op[0].tolist(), "origin_shift": op[1].tolist()}
+    config["regress"]["transformations"].insert(0, op)
+
+    return config
+
+
 def count_configurations() -> int:
     """Count number of atomic configurations."""
     with pathlib.Path("ikdsplit.toml").open("rb") as f:
@@ -34,7 +54,7 @@ def count_configurations() -> int:
 
 
 def recur_prepare(
-    config: dict,
+    superconfig: dict,
     supergroup: int,
     group: int,
     level: int,
@@ -54,9 +74,10 @@ def recur_prepare(
         else:
             write_wycksplit_toml_orig(group)
             shutil.copy2("../atoms_conventional.csv", ".")
-            shutil.copy2("../cell.dat", ".")
 
-        write_config(config | {"space_group_number": group})
+        config = update_config(superconfig)
+
+        write_config(config)
 
         print(f"({count_configurations()} configurations)")
 

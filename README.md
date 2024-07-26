@@ -18,15 +18,7 @@ pip install -e .
 
 ## Input files
 
-4 input files are necessary.
-
-`cell.dat`
-
-```
-    6.555923429801207014     0.000000000000000000     0.000000000000000000
-    0.000000000000000000     6.555923429801207014     0.000000000000000000
-    0.000000000000000000     0.000000000000000000     6.555923429801207014
-```
+3 input files are necessary.
 
 `atoms_conventional.csv`
 
@@ -41,6 +33,8 @@ symbol,wyckoff,x,y,z
 
 ```toml
 space_group_number = 227
+
+cell = 6.555923429801207014
 
 [fill]
 Ti = ['Ti']
