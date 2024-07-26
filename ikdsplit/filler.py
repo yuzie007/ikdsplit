@@ -9,6 +9,7 @@ from ase import Atoms
 from ase.spacegroup import crystal, get_spacegroup
 
 from ikdsplit.io import parse_config
+from ikdsplit.spacegroup import get_setting_for_origin_choice_2
 
 
 def index_wyckoff(df: pd.DataFrame) -> pd.DataFrame:
@@ -27,7 +28,7 @@ def make_atoms(
 ) -> Atoms:
     """Make `Atoms` based on `atoms_conventional.csv` and `fill`."""
     # hexagonal cell (consistent with Bilbao) for rhombohedral space groups
-    setting = 1 if (3 <= spacegroup <= 15 or 143 <= spacegroup <= 194) else 2
+    setting = get_setting_for_origin_choice_2(spacegroup)
 
     included = df["symbol"] != "X"  # remove vacancies
     symbols = df[included]["symbol"].str.strip().to_numpy()

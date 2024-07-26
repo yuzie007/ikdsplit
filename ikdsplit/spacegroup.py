@@ -3,6 +3,14 @@
 import numpy as np
 
 
+def get_setting_for_origin_choice_2(space_group_number: int) -> int:
+    """Get `setting` for origin choice 2."""
+    orthorhombic = [48, 50, 59, 68, 70]
+    tetragonal = [85, 86, 88, 125, 126, 129, 130, 133, 134, 137, 138, 141, 142]
+    cubic = [201, 203, 222, 224, 227, 228]
+    return 2 if space_group_number in orthorhombic + tetragonal + cubic else 1
+
+
 def invert(
     basis_change: np.ndarray,
     origin_shift: np.ndarray,
