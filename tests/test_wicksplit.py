@@ -5,6 +5,7 @@ import os
 import pathlib
 import tomllib
 
+import numpy as np
 import pytest
 from ase.spacegroup import Spacegroup
 
@@ -13,7 +14,6 @@ from ikdsplit.spacegroup import (
     check_equal,
     convert_symmetry_operations,
     get_setting_for_origin_choice_2,
-    get_symmetry_operations,
     invert,
     multiply,
 )
@@ -35,12 +35,32 @@ def test_wycksplit(fn: str) -> None:
 
 def get_symops(nsup: int, nsub: int, d: dict) -> tuple:
     sg_sup = Spacegroup(nsup, setting=get_setting_for_origin_choice_2(nsup))
-    symops_sup = get_symmetry_operations(sg_sup)
+    symops_sup = sg_sup.get_symop()
     sg_sub = Spacegroup(nsub, setting=get_setting_for_origin_choice_2(nsub))
-    symops_sub = get_symmetry_operations(sg_sub)
+    symops_sub = sg_sub.get_symop()
     transformation = invert(d["basis_change"], d["origin_shift"])
     symops_sub = convert_symmetry_operations(symops_sub, transformation)
     return symops_sup, symops_sub, sg_sup.subtrans
+
+
+def reduce_subtranslations(
+    subtranslations: np.ndarray,
+    coset_representatives: list[dict[str, np.ndarray]],
+) -> np.ndarray:
+    """Reduce subtranslations according to coset representatives."""
+    is_found = []
+    rotation = np.eye(3, dtype=int)
+    for subtranslation in subtranslations:
+        for representative in coset_representatives:
+            _ = representative["rotation"], representative["translation"]
+            if check_equal(_, (rotation, subtranslation)):
+                is_found.append(True)
+                break
+        else:
+            is_found.append(False)
+    if all(is_found):
+        return np.zeros((1, 3))
+    return subtranslations
 
 
 @pytest.mark.parametrize("fn", toml_files)
@@ -49,12 +69,12 @@ def test_subgroup(fn: str) -> None:
     nsup, nsub = (int(_) for _ in fn.split(".")[0].split("_"))
     with pathlib.Path(src / fn).open("rb") as f:
         d = tomllib.load(f)
-    symops_sup, symops_sub, subtrans = get_symops(nsup, nsub, d)
+    symops_sup, symops_sub, _ = get_symops(nsup, nsub, d)
 
     is_supergroup = []
     for symop_sub in symops_sub:
         for symop_sup in symops_sup:
-            if check_equal(symop_sub, symop_sup, subtrans):
+            if check_equal(symop_sub, symop_sup):
                 is_supergroup.append(True)
                 break
         else:
@@ -68,18 +88,28 @@ def test_coset_decomposition(fn: str) -> None:
     nsup, nsub = (int(_) for _ in fn.split(".")[0].split("_"))
     with pathlib.Path(src / fn).open("rb") as f:
         d = tomllib.load(f)
-    symops_sup, symops_sub, subtrans = get_symops(nsup, nsub, d)
+    symops_sup, symops_sub, subtranslations = get_symops(nsup, nsub, d)
+
+    subtranslations = reduce_subtranslations(
+        subtranslations,
+        d["coset_representatives"],
+    )
 
     is_subgroup = []
-    for symop_sup in symops_sup:
+    for symop_sup_orig in symops_sup:
         found = False
-        for symop_sub in symops_sub:
-            for i, _ in enumerate(d["coset_representatives"]):
-                coset_representative = _["rotation"], _["translation"]
-                tmp = multiply(coset_representative, symop_sub)
-                if check_equal(tmp, symop_sup, subtrans):
-                    is_subgroup.append(i)
-                    found = True
+        for subtranslation in subtranslations:
+            op = (np.eye(3, dtype=int), subtranslation)
+            symop_sup = multiply(op, symop_sup_orig)
+            for symop_sub in symops_sub:
+                for i, _ in enumerate(d["coset_representatives"]):
+                    coset_representative = _["rotation"], _["translation"]
+                    tmp = multiply(coset_representative, symop_sub)
+                    if check_equal(tmp, symop_sup):
+                        is_subgroup.append(i)
+                        found = True
+                        break
+                if found:
                     break
             if found:
                 break

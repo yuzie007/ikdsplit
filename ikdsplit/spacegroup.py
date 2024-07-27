@@ -1,7 +1,6 @@
 """Spacegroup."""
 
 import numpy as np
-from ase.spacegroup import Spacegroup
 
 
 def get_setting_for_origin_choice_2(space_group_number: int) -> int:
@@ -46,20 +45,6 @@ def multiply(
     return basis_change, origin_shift
 
 
-def get_symmetry_operations(
-    sg: Spacegroup,
-) -> list[tuple[np.ndarray, np.ndarray]]:
-    """Get symmetry operations without sub-translations."""
-    symops = []
-    parities = [1]
-    if sg.centrosymmetric:
-        parities.append(-1)
-    for parity in parities:
-        for rot, trans in zip(sg.rotations, sg.translations, strict=True):
-            symops.append((parity * rot, trans))
-    return symops
-
-
 def convert_symmetry_operations(
     old: list[tuple[np.ndarray, np.ndarray]],
     transformation: tuple[np.ndarray, np.ndarray],
@@ -73,12 +58,8 @@ def convert_symmetry_operations(
 def check_equal(
     op0: tuple[np.ndarray, np.ndarray],
     op1: tuple[np.ndarray, np.ndarray],
-    subtrans: np.ndarray,
 ) -> bool:
     """Check if the symmetry operations are equivalent."""
-    for subt in subtrans:
-        d = op0[1] - (op1[1] + subt)
-        d -= np.rint(d)
-        if np.allclose(op0[0], op1[0]) and np.allclose(d, 0.0):
-            return True
-    return False
+    d = op0[1] - op1[1]
+    d -= np.rint(d)
+    return np.allclose(op0[0], op1[0]) and np.allclose(d, 0.0)
