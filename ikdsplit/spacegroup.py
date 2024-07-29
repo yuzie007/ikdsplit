@@ -3,6 +3,14 @@
 import numpy as np
 
 
+def get_setting_for_origin_choice_2(space_group_number: int) -> int:
+    """Get `setting` for origin choice 2."""
+    orthorhombic = [48, 50, 59, 68, 70]
+    tetragonal = [85, 86, 88, 125, 126, 129, 130, 133, 134, 137, 138, 141, 142]
+    cubic = [201, 203, 222, 224, 227, 228]
+    return 2 if space_group_number in orthorhombic + tetragonal + cubic else 1
+
+
 def invert(
     basis_change: np.ndarray,
     origin_shift: np.ndarray,
@@ -35,3 +43,23 @@ def multiply(
     basis_change = basis_change_0 @ basis_change_1
     origin_shift = basis_change_0 @ origin_shift_1 + origin_shift_0
     return basis_change, origin_shift
+
+
+def convert_symmetry_operations(
+    old: list[tuple[np.ndarray, np.ndarray]],
+    transformation: tuple[np.ndarray, np.ndarray],
+) -> list[tuple[np.ndarray, np.ndarray]]:
+    """Convert symmetry operations by the given transformation."""
+    inverse = invert(transformation[0], transformation[1])
+    new = [multiply(inverse, multiply(_, transformation)) for _ in old]
+    return [(r, t - np.floor(t)) for r, t in new]
+
+
+def check_equal(
+    op0: tuple[np.ndarray, np.ndarray],
+    op1: tuple[np.ndarray, np.ndarray],
+) -> bool:
+    """Check if the symmetry operations are equivalent."""
+    d = op0[1] - op1[1]
+    d -= np.rint(d)
+    return np.allclose(op0[0], op1[0]) and np.allclose(d, 0.0)
