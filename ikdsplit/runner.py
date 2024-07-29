@@ -5,9 +5,9 @@ import pathlib
 
 from ikdsplit.filler import fill
 from ikdsplit.io import make_default_config, parse_config
-from ikdsplit.preparer import recur_prepare
 from ikdsplit.regressor import regress
 from ikdsplit.sorter import sort_all
+from ikdsplit.splitter import recur_prepare
 from ikdsplit.utils import cd, get_subgroups, print_group
 
 

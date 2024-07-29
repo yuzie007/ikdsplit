@@ -7,6 +7,7 @@ import ikdsplit.filler
 import ikdsplit.regressor
 import ikdsplit.runner
 import ikdsplit.sorter
+import ikdsplit.splitter
 
 
 def main() -> None:
@@ -16,6 +17,7 @@ def main() -> None:
     subparsers = parser.add_subparsers(dest="command")
 
     commands = {
+        "split": ikdsplit.splitter,
         "run": ikdsplit.runner,
         "convert": ikdsplit.converter,
         "fill": ikdsplit.filler,
