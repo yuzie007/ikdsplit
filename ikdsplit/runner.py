@@ -7,7 +7,6 @@ from ikdsplit.filler import fill
 from ikdsplit.io import make_default_config, parse_config
 from ikdsplit.regressor import regress
 from ikdsplit.sorter import sort_all
-from ikdsplit.splitter import recur_prepare
 from ikdsplit.utils import cd, get_subgroups, print_group
 
 
@@ -43,10 +42,6 @@ def start(max_level: int = 1) -> None:
     """Start calculations."""
     config = make_default_config()
     config.update(parse_config())
-
-    print("prepare ...")
-    recur_prepare(config, None, config["space_group_number"], 0, max_level)
-    print()
 
     print("run ...")
     recur_run(config, None, config["space_group_number"], 0, max_level)
