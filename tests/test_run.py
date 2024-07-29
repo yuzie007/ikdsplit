@@ -21,4 +21,5 @@ def test_run(data_path: str, tmp_path) -> None:
             shutil.copy2(src / _, tmp_path)
 
     with cd(tmp_path):
+        assert subprocess.call(["ikdsplit", "split"]) == 0
         assert subprocess.call(["ikdsplit", "run", "-l", str(level)]) == 0
