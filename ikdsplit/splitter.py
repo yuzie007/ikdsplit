@@ -7,24 +7,15 @@ import pathlib
 import pandas as pd
 
 from ikdsplit.converter import add_wyckoff, convert
-from ikdsplit.io import (
-    fetch_transformation,
-    make_default_config,
-    parse_config,
-    write_config,
-)
+from ikdsplit.io import make_default_config, parse_config, write_config
 from ikdsplit.spacegroup import (
+    fetch_transformation,
     find_crystal_class,
     find_point_group_order,
+    get_subgroups,
     invert,
 )
-from ikdsplit.utils import (
-    cd,
-    count_configurations,
-    format_df,
-    get_subgroups,
-    print_group,
-)
+from ikdsplit.utils import cd, count_configurations, format_df, print_group
 
 
 def update_config(superconfig: dict, spg_sup: int, spg_sub: int) -> dict:

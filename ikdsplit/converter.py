@@ -5,9 +5,9 @@ import argparse
 import numpy as np
 import pandas as pd
 
-from ikdsplit.io import fetch_transformation
 from ikdsplit.spacegroup import (
     expand_equivalent_positions,
+    fetch_transformation,
     find_wyckoff,
     reduce_equivalent_positions,
 )

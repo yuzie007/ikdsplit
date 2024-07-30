@@ -7,8 +7,12 @@ from ikdsplit.filler import fill
 from ikdsplit.io import make_default_config, parse_config
 from ikdsplit.regressor import regress
 from ikdsplit.sorter import sort_all
-from ikdsplit.spacegroup import find_crystal_class, find_point_group_order
-from ikdsplit.utils import cd, count_configurations, get_subgroups, print_group
+from ikdsplit.spacegroup import (
+    find_crystal_class,
+    find_point_group_order,
+    get_subgroups,
+)
+from ikdsplit.utils import cd, count_configurations, print_group
 
 
 def recur_run(
