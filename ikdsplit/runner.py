@@ -18,13 +18,15 @@ def recur_run(
     level: int,
     max_level: int,
     min_order: int,
+    max_configurations: int,
 ) -> None:
     """Run each subgroup recursively."""
     print_group(group, level, end=" ")
     order = find_point_group_order(find_crystal_class(group))
     print(f"(order: {order})", end=" ")
-    print(f"({count_configurations()} configurations)", end=" ")
-    if order < min_order:
+    ncs = count_configurations()
+    print(f"({ncs} configurations)", end=" ")
+    if order < min_order or ncs > max_configurations:
         print("... skipped")
         return
     else:
@@ -45,10 +47,22 @@ def recur_run(
 
         subgroups = get_subgroups(group)
         for subgroup in subgroups:
-            recur_run(config, group, subgroup, level + 1, max_level, min_order)
+            recur_run(
+                config,
+                group,
+                subgroup,
+                level + 1,
+                max_level,
+                min_order,
+                max_configurations,
+            )
 
 
-def start(max_level: int = 1, min_order: int = 4) -> None:
+def start(
+    max_level: int = 1,
+    min_order: int = 4,
+    max_configurations: int = 2**12,  # 4096
+) -> None:
     """Start calculations."""
     config = make_default_config()
     config.update(parse_config())
@@ -61,6 +75,7 @@ def start(max_level: int = 1, min_order: int = 4) -> None:
         0,
         max_level,
         min_order,
+        max_configurations,
     )
     print()
 
@@ -84,8 +99,15 @@ def add_arguments(parser: argparse.ArgumentParser) -> None:
         type=int,
         help="minimum order of space group to be checked",
     )
+    parser.add_argument(
+        "-c",
+        "--configurations",
+        default=2**12,  # 4096
+        type=int,
+        help="maximum configurations to be checked",
+    )
 
 
 def run(args: argparse.Namespace) -> None:
     """Run."""
-    start(args.level, args.order)
+    start(args.level, args.order, args.configurations)

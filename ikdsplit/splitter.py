@@ -73,7 +73,8 @@ def recur_prepare(
 
         order = find_point_group_order(find_crystal_class(group))
         print(f"(order: {order})", end=" ")
-        print(f"({count_configurations()} configurations)")
+        ncs = count_configurations()
+        print(f"({ncs} configurations)")
 
         subgroups = get_subgroups(group)
         for subgroup in subgroups:
