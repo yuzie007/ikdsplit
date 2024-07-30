@@ -9,7 +9,7 @@ import tomllib
 
 import pandas as pd
 
-from ikdsplit.converter import convert
+from ikdsplit.converter import add_wyckoff, convert
 from ikdsplit.io import (
     fetch_transformation,
     make_default_config,
@@ -17,7 +17,7 @@ from ikdsplit.io import (
     write_config,
 )
 from ikdsplit.spacegroup import invert
-from ikdsplit.utils import cd, get_subgroups, print_group
+from ikdsplit.utils import cd, get_subgroups, format_df, print_group
 
 
 def update_config(superconfig: dict, spg_sup: int, spg_sub: int) -> dict:
@@ -61,7 +61,12 @@ def recur_prepare(
         if supergroup:
             convert(supergroup, group)
         else:
-            shutil.copy2("../atoms_conventional.csv", ".")
+            fn = "../atoms_conventional.csv"
+            df = pd.read_csv(fn, skipinitialspace=True)
+            df = add_wyckoff(df, group)
+            df = format_df(df)
+            fn = "atoms_conventional.csv"
+            df.to_csv(fn, float_format="%24.18f", index=False)
 
         config = update_config(superconfig, supergroup, group)
 
