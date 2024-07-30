@@ -19,6 +19,7 @@ authors = [
 ikdsplit = "ikdsplit.__init__:main"
 
 [tool.setuptools.package-data]
+"ikdsplit.database.wyckoff" = ["*.csv"]
 "ikdsplit.database.wycksplit" = ["*.toml"]
 
 [tool.ruff.lint]

@@ -1,89 +1,44 @@
 """Convert `atoms_conventional.csv` for the subgroup."""
 
 import argparse
-import pathlib
-import tomllib
 
 import numpy as np
 import pandas as pd
-from ase.spacegroup import Spacegroup
 
-from ikdsplit.spacegroup import get_setting_for_origin_choice_2
+from ikdsplit.io import fetch_transformation
+from ikdsplit.spacegroup import (
+    expand_equivalent_positions,
+    find_wyckoff,
+    reduce_equivalent_positions,
+)
 from ikdsplit.utils import format_df
 
 
-def expand_equivalent_positions(
-    xyz0: np.ndarray,
-    space_group_number: int,
-) -> np.ndarray:
-    """Expand symmetrically equivalent positions.
+def add_wyckoff(df: pd.DataFrame, space_group_number: int) -> pd.DataFrame:
+    """Add Wyckoff letters."""
+    ds = []
+    for s in df.to_dict(orient="records"):
+        d = {}
+        d["symbol"] = s["symbol"]
 
-    Parameters
-    ----------
-    xyz0 : np.ndarray
-        Original positions.
-    space_group_number : int
-        Space group number.
+        for k in s:
+            if k.startswith("wyckoff_"):
+                d[k] = s[k]
 
-    Returns
-    -------
-    xyzs : np.ndarray
-        Symmetrically equivalent positions.
+        xyz = np.array((s["x"], s["y"], s["z"]))
+        key = f"wyckoff_{space_group_number:03d}"
+        d[key] = find_wyckoff(xyz, space_group_number)
 
-    """
-    setting = get_setting_for_origin_choice_2(space_group_number)
-    symops = Spacegroup(space_group_number, setting).get_symop()
-    xyzs = [xyz0]
-    for r, t in symops:
-        xyz = r @ xyz0 + t
-        diff = xyz[None, :] - np.array(xyzs)
-        diff -= np.rint(diff)
-        if not np.any(np.all(np.isclose(diff, 0.0), axis=1)):
-            xyzs.append(xyz)
-    return np.array(xyzs)
+        d["x"], d["y"], d["z"] = xyz
+
+        ds.append(d)
+
+    return pd.DataFrame(ds)
 
 
-def reduce_equivalent_positions(
-    xyz0s: np.ndarray,
-    space_group_number: int,
-) -> np.ndarray:
-    """Reduce symmetrically equivalent positions.
-
-    Parameters
-    ----------
-    xyz0s : np.ndarray
-        Positions to be reduced.
-    space_group_number : int
-        Space group number.
-
-    Returns
-    -------
-    np.ndarray
-        Reduced positions.
-
-    """
-    setting = get_setting_for_origin_choice_2(space_group_number)
-    symops = Spacegroup(space_group_number, setting).get_symop()
-    xyzs = [xyz0s[0]]
-    for xyz0 in xyz0s:
-        for r, t in symops:
-            xyz = r @ xyz0 + t
-            diff = xyz[None, :] - np.array(xyzs)
-            diff -= np.rint(diff)
-            if np.any(np.all(np.isclose(diff, 0.0), axis=1)):
-                break
-        else:
-            xyzs.append(xyz0)
-    return np.array(xyzs)
-
-
-def convert() -> None:
+def convert(spg_sup: int, spg_sub: int) -> None:
     """Convert `atoms_conventional.csv` for the subgroup."""
-    with pathlib.Path("wycksplit.toml").open("rb") as f:
-        wycksplit = tomllib.load(f)
-
-    spgno_sup = wycksplit["space_group_number_sup"]
-    spgno_sub = wycksplit["space_group_number_sub"]
+    change_of_basis, origin_shift = fetch_transformation(spg_sup, spg_sub)
 
     df = pd.read_csv("../atoms_conventional.csv", skipinitialspace=True)
 
@@ -91,31 +46,40 @@ def convert() -> None:
     for _, s in df.iterrows():
         xyz0 = s[["x", "y", "z"]].to_numpy(float)
 
-        xyzs = expand_equivalent_positions(xyz0, spgno_sup)
+        xyzs = expand_equivalent_positions(xyz0, spg_sup)
 
         # change coordinates for subgroup
-        xyzs -= wycksplit["origin_shift"]
-        xyzs = (np.linalg.inv(wycksplit["basis_change"]) @ xyzs.T).T
+        xyzs -= origin_shift
+        xyzs = (np.linalg.inv(change_of_basis) @ xyzs.T).T
         xyzs -= np.rint(xyzs)
 
-        xyzs = reduce_equivalent_positions(xyzs, spgno_sub)
+        xyzs = reduce_equivalent_positions(xyzs, spg_sub)
 
         for xyz in xyzs:
             d = {}
             d["symbol"] = s["symbol"]
-            d["wyckoff"] = s["wyckoff"]
+            for k in s.index.to_numpy().tolist():
+                if k.startswith("wyckoff_"):
+                    d[k] = s[k]
             d["x"], d["y"], d["z"] = xyz
             ds.append(d)
 
     df = pd.DataFrame(ds)
+
+    df = add_wyckoff(df, spg_sub)
+
     df = format_df(df)
+
     filename = "atoms_conventional.csv"
     df.to_csv(filename, float_format="%24.18f", index=False)
 
 
 def add_arguments(parser: argparse.ArgumentParser) -> None:
-    pass
+    """Add arguments."""
+    parser.add_argument("--sup", type=int)
+    parser.add_argument("--sub", type=int)
 
 
 def run(args: argparse.Namespace) -> None:
-    convert()
+    """Run."""
+    convert(args.sup, args.sub)

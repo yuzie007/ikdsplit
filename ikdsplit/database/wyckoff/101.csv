@@ -1,0 +1,6 @@
+multiplicity,wyckoff_letter,site_symmetry,coordinates
+8,e,1,"(x,y,z)"
+4,d,..m,"(x,x,z)"
+4,c,2..,"(0,1/2,z)"
+2,b,2.m m,"(1/2,1/2,z)"
+2,a,2.m m,"(0,0,z)"

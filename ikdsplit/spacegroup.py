@@ -1,6 +1,13 @@
 """Spacegroup."""
 
+import pathlib
+import re
+
 import numpy as np
+import pandas as pd
+from ase.spacegroup import Spacegroup
+
+import ikdsplit
 
 
 def get_setting_for_origin_choice_2(space_group_number: int) -> int:
@@ -63,3 +70,159 @@ def check_equal(
     d = op0[1] - op1[1]
     d -= np.rint(d)
     return np.allclose(op0[0], op1[0]) and np.allclose(d, 0.0)
+
+
+def parse_transformation(s: str) -> tuple[np.ndarray, np.ndarray]:
+    """Parse transformation string.
+
+    Parameters
+    ----------
+    s : str
+        String like "(x+y+1/2,y,z)".
+
+    Returns
+    -------
+    tuple[np.ndarray, np.ndarray]
+        Rotation and translation.
+
+    """
+
+    def split_equation(equation: str) -> list[str]:
+        """Split equation at "+" and "-"."""
+        # https://docs.python.org/3/library/re.html#regular-expression-syntax
+        # `(?<!^)` avoids empty string in "+x" -> ["", "+x"]
+        return re.split(r"(?<!^)(?=[-+])", equation)
+
+    def parse_coefficient(sr: str) -> int:
+        """Parse coefficient preceding "xyz"."""
+        if not sr:
+            return 1
+        if sr == "+":
+            return 1
+        if sr == "-":
+            return -1
+        return int(sr)
+
+    def parse_translation(st: str) -> float:
+        """Parse translation."""
+        frac = st.split("/")
+        numerator = int(frac[0])
+        denominator = 1 if len(frac) == 1 else int(frac[1])
+        return numerator / denominator
+
+    p = s.strip("()").split(",")
+    r = np.zeros((3, 3), dtype=int)
+    t = np.zeros(3, dtype=float)
+    xyz = "xyz"
+
+    for i in range(3):
+        for q in split_equation(p[i]):
+            if q[-1] in xyz:
+                j = xyz.index(q[-1])
+                r[i, j] += parse_coefficient(q[:-1])
+            else:
+                t[i] += parse_translation(q)
+
+    return r, t
+
+
+def find_wyckoff(xyz0: np.ndarray, space_group_number: int) -> str:
+    """Find Wyckoff position.
+
+    Parameters
+    ----------
+    xyz0 : np.ndarray
+        Position to be checked.
+    space_group_number : int
+        Space group number.
+
+    Returns
+    -------
+    str
+        Wyckoff letter with multiplicity.
+
+    """
+    src = pathlib.Path(ikdsplit.__file__).parent / "database" / "wyckoff"
+    wyckoffs = pd.read_csv(src / f"{space_group_number:03d}.csv")
+
+    # get all symmetrically equivalent positions
+    # one of them should be equal to the representative Wyckoff coordinates
+    xyzs = expand_equivalent_positions(xyz0, space_group_number)
+
+    for d in wyckoffs.to_dict(orient="records")[::-1]:
+        # skip if #(symmetrically equivalent points) != multiplicity
+        if len(xyzs) != d["multiplicity"]:
+            continue
+        for xyz in xyzs:
+            r, t = parse_transformation(d["coordinates"])
+            xyz_refined = r @ xyz + t
+            diff = xyz - xyz_refined
+            diff -= np.rint(diff)
+            if np.allclose(diff, 0.0):
+                return str(d["multiplicity"]) + d["wyckoff_letter"]
+    raise RuntimeError(xyz0, space_group_number)
+
+
+def expand_equivalent_positions(
+    xyz0: np.ndarray,
+    space_group_number: int,
+) -> np.ndarray:
+    """Expand symmetrically equivalent positions.
+
+    Parameters
+    ----------
+    xyz0 : np.ndarray
+        Original positions.
+    space_group_number : int
+        Space group number.
+
+    Returns
+    -------
+    xyzs : np.ndarray
+        Symmetrically equivalent positions.
+
+    """
+    setting = get_setting_for_origin_choice_2(space_group_number)
+    symops = Spacegroup(space_group_number, setting).get_symop()
+    xyzs = [xyz0]
+    for r, t in symops:
+        xyz = r @ xyz0 + t
+        diff = xyz[None, :] - np.array(xyzs)
+        diff -= np.rint(diff)
+        if not np.any(np.all(np.isclose(diff, 0.0), axis=1)):
+            xyzs.append(xyz)
+    return np.array(xyzs)
+
+
+def reduce_equivalent_positions(
+    xyz0s: np.ndarray,
+    space_group_number: int,
+) -> np.ndarray:
+    """Reduce symmetrically equivalent positions.
+
+    Parameters
+    ----------
+    xyz0s : np.ndarray
+        Positions to be reduced.
+    space_group_number : int
+        Space group number.
+
+    Returns
+    -------
+    np.ndarray
+        Reduced positions.
+
+    """
+    setting = get_setting_for_origin_choice_2(space_group_number)
+    symops = Spacegroup(space_group_number, setting).get_symop()
+    xyzs = [xyz0s[0]]
+    for xyz0 in xyz0s:
+        for r, t in symops:
+            xyz = r @ xyz0 + t
+            diff = xyz[None, :] - np.array(xyzs)
+            diff -= np.rint(diff)
+            if np.any(np.all(np.isclose(diff, 0.0), axis=1)):
+                break
+        else:
+            xyzs.append(xyz0)
+    return np.array(xyzs)

@@ -1,0 +1,9 @@
+multiplicity,wyckoff_letter,site_symmetry,coordinates
+16,h,1,"(x,y,z)"
+8,g,.m.,"(1/4,y,z)"
+8,f,..2,"(x,-x,1/4)"
+8,e,-1,"(0,0,0)"
+4,d,2mm .,"(1/4,1/4,z)"
+4,c,2mm .,"(3/4,1/4,z)"
+2,b,-4m2,"(3/4,1/4,1/4)"
+2,a,-4m2,"(3/4,1/4,3/4)"
