@@ -40,7 +40,7 @@ def recur_run(
         d = config["sort"]
         sort_all(d["reference"])
 
-        if 0 <= max_level <= level:
+        if 0 < max_level <= level:
             return
 
         subgroups = get_subgroups(group)
@@ -70,9 +70,12 @@ def add_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "-l",
         "--level",
-        default=1,
+        default=0,
         type=int,
-        help="level up to which maximal subgroups are checked",
+        help=(
+            "level up to which maximal subgroups are checked "
+            "(default (0): all levels are checked)"
+        ),
     )
     parser.add_argument(
         "-o",
