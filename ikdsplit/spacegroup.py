@@ -1,5 +1,7 @@
 """Spacegroup."""
 
+import re
+
 import numpy as np
 
 
@@ -63,3 +65,57 @@ def check_equal(
     d = op0[1] - op1[1]
     d -= np.rint(d)
     return np.allclose(op0[0], op1[0]) and np.allclose(d, 0.0)
+
+
+def parse_transformation(s: str) -> tuple[np.ndarray, np.ndarray]:
+    """Parse transformation string.
+
+    Parameters
+    ----------
+    s : str
+        String like "(x+y+1/2,y,z)".
+
+    Returns
+    -------
+    tuple[np.ndarray, np.ndarray]
+        Rotation and translation.
+
+    """
+
+    def split_equation(equation: str) -> list[str]:
+        """Split equation at "+" and "-"."""
+        # https://docs.python.org/3/library/re.html#regular-expression-syntax
+        # `(?<!^)` avoids empty string in "+x" -> ["", "+x"]
+        return re.split(r"(?<!^)(?=[-+])", equation)
+
+    def parse_coefficient(sr: str) -> int:
+        """Parse coefficient preceding "xyz"."""
+        if not sr:
+            return 1
+        if sr == "+":
+            return 1
+        if sr == "-":
+            return -1
+        return int(sr)
+
+    def parse_translation(st: str) -> float:
+        """Parse translation."""
+        frac = st.split("/")
+        numerator = int(frac[0])
+        denominator = 1 if len(frac) == 1 else int(frac[1])
+        return numerator / denominator
+
+    p = s.strip("()").split(",")
+    r = np.zeros((3, 3), dtype=int)
+    t = np.zeros(3, dtype=float)
+    xyz = "xyz"
+
+    for i in range(3):
+        for q in split_equation(p[i]):
+            if q[-1] in xyz:
+                j = xyz.index(q[-1])
+                r[i, j] += parse_coefficient(q[:-1])
+            else:
+                t[i] += parse_translation(q)
+
+    return r, t
