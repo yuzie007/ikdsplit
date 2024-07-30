@@ -44,13 +44,12 @@ def cumulate_coordinate_change() -> tuple[np.ndarray, np.ndarray]:
     """Cumulate changes of the coordinate system in the application order."""
     ops = []
 
-    wycksplit_toml = pathlib.Path("wycksplit.toml")
-    if wycksplit_toml.is_file():
-        with wycksplit_toml.open("rb") as f:
-            d = tomllib.load(f)
-        basis_change_first = get_p2c(d["space_group_number_sub"])
-        origin_shift_first = np.array([0.0, 0.0, 0.0])
-        ops.append((basis_change_first, origin_shift_first))
+    with pathlib.Path("ikdsplit.toml").open("rb") as f:
+        config = tomllib.load(f)
+
+    basis_change_first = get_p2c(config["space_group_number"])
+    origin_shift_first = np.array([0.0, 0.0, 0.0])
+    ops.append((basis_change_first, origin_shift_first))
 
     config = parse_config()
 

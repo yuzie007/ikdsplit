@@ -8,7 +8,11 @@ import numpy as np
 import pandas as pd
 from ase.spacegroup import Spacegroup
 
-from ikdsplit.spacegroup import get_setting_for_origin_choice_2
+import ikdsplit
+from ikdsplit.spacegroup import (
+    get_setting_for_origin_choice_2,
+    parse_transformation,
+)
 from ikdsplit.utils import format_df
 
 
@@ -77,6 +81,43 @@ def reduce_equivalent_positions(
     return np.array(xyzs)
 
 
+def find_wyckoff(xyz0: np.ndarray, space_group_number: int) -> str:
+    """Find Wyckoff position.
+
+    Parameters
+    ----------
+    xyz0 : np.ndarray
+        Position to be checked.
+    space_group_number : int
+        Space group number.
+
+    Returns
+    -------
+    str
+        Wyckoff letter with multiplicity.
+
+    """
+    src = pathlib.Path(ikdsplit.__file__).parent / "database" / "wyckoff"
+    wyckoffs = pd.read_csv(src / f"{space_group_number:03d}.csv")
+
+    # get all symmetrically equivalent positions
+    # one of them should be equal to the representative Wyckoff coordinates
+    xyzs = expand_equivalent_positions(xyz0, space_group_number)
+
+    for d in wyckoffs.to_dict(orient="records")[::-1]:
+        # skip if #(symmetrically equivalent points) != multiplicity
+        if len(xyzs) != d["multiplicity"]:
+            continue
+        for xyz in xyzs:
+            r, t = parse_transformation(d["coordinates"])
+            xyz_refined = r @ xyz + t
+            diff = xyz - xyz_refined
+            diff -= np.rint(diff)
+            if np.allclose(diff, 0.0):
+                return str(d["multiplicity"]) + d["wyckoff_letter"]
+    raise RuntimeError(xyz0, space_group_number)
+
+
 def convert() -> None:
     """Convert `atoms_conventional.csv` for the subgroup."""
     with pathlib.Path("wycksplit.toml").open("rb") as f:
@@ -103,7 +144,10 @@ def convert() -> None:
         for xyz in xyzs:
             d = {}
             d["symbol"] = s["symbol"]
-            d["wyckoff"] = s["wyckoff"]
+            for k in s.index.to_numpy().tolist():
+                if k.startswith("wyckoff_"):
+                    d[k] = s[k]
+            d[f"wyckoff_{spgno_sub:03d}"] = find_wyckoff(xyz, spgno_sub)
             d["x"], d["y"], d["z"] = xyz
             ds.append(d)
 
