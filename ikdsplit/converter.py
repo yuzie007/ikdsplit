@@ -71,7 +71,7 @@ def convert(spg_sup: int, spg_sub: int) -> None:
     df = format_df(df)
 
     filename = "atoms_conventional.csv"
-    df.to_csv(filename, float_format="%24.18f", index=False)
+    df.to_csv(filename, float_format="%21.15f", index=False)
 
 
 def add_arguments(parser: argparse.ArgumentParser) -> None:
