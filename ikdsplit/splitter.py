@@ -10,35 +10,27 @@ import tomllib
 import pandas as pd
 
 from ikdsplit.converter import convert
-from ikdsplit.io import make_default_config, parse_config, write_config
+from ikdsplit.io import (
+    fetch_transformation,
+    make_default_config,
+    parse_config,
+    write_config,
+)
 from ikdsplit.spacegroup import invert
 from ikdsplit.utils import cd, get_subgroups, print_group
 
 
-def write_wycksplit_toml_orig(group: int) -> None:
-    """Write `wycksplit.toml` for the parent group."""
-    s = f"""\
-space_group_number_sup = {group}
-space_group_number_sub = {group}
-basis_change = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
-origin_shift = [0.0, 0.0, 0.0]
-"""
-    with pathlib.Path("wycksplit.toml").open("w", encoding="utf-8") as f:
-        f.write(s)
-
-
-def update_config(superconfig: dict) -> dict:
+def update_config(superconfig: dict, spg_sup: int, spg_sub: int) -> dict:
     """Update `config` for subgroup."""
     config = copy.deepcopy(superconfig)
 
-    with pathlib.Path("wycksplit.toml").open("rb") as f:
-        wycksplit = tomllib.load(f)
+    config["space_group_number"] = spg_sub
 
-    config["space_group_number"] = wycksplit["space_group_number_sub"]
+    change_of_basis, origin_shift = fetch_transformation(spg_sup, spg_sub)
 
-    config["cell"] = (config["cell"].T @ wycksplit["basis_change"]).T
+    config["cell"] = (config["cell"].T @ change_of_basis).T
 
-    op = invert(wycksplit["basis_change"], wycksplit["origin_shift"])
+    op = invert(change_of_basis, origin_shift)
     op = {"basis_change": op[0].tolist(), "origin_shift": op[1].tolist()}
     config["regress"]["transformations"].insert(0, op)
 
@@ -63,19 +55,15 @@ def recur_prepare(
     """Prepare each subgroup recursively."""
     print_group(group, level, end=" ")
 
-    src = pathlib.Path(__file__).parent / "database"
     dn = pathlib.Path(f"{group:03d}")
     dn.mkdir(parents=True, exist_ok=True)
     with cd(dn):
         if supergroup:
-            fn = src / "wycksplit" / f"{supergroup:03d}_{group:03d}.toml"
-            shutil.copy(fn, "wycksplit.toml")
-            convert()
+            convert(supergroup, group)
         else:
-            write_wycksplit_toml_orig(group)
             shutil.copy2("../atoms_conventional.csv", ".")
 
-        config = update_config(superconfig)
+        config = update_config(superconfig, supergroup, group)
 
         write_config(config)
 

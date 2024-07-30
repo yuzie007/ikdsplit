@@ -7,6 +7,8 @@ import tomllib
 import numpy as np
 from ase.geometry import cellpar_to_cell
 
+import ikdsplit
+
 
 def make_default_config() -> dict:
     """Make default `config`."""
@@ -72,3 +74,31 @@ def write_config(config: dict) -> None:
             for k, v in transformation.items():
                 r = repr(v)
                 f.write(f"{k} = {r}\n")
+
+
+def fetch_transformation(
+    spg_sup: int | None,
+    spg_sub: int,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Fetch transformation of coordinates.
+
+    Parameters
+    ----------
+    spg_sup : int | None
+        Space group number of supergroup.
+    spg_sub : int
+        Space group number of subgroup.
+
+    Returns
+    -------
+    tuple[np.ndarray, np.ndarray]
+        Change of the basis and origin shift.
+
+    """
+    if spg_sup is None:
+        return np.eye(3, dtype=int), np.zeros(3)
+    src = pathlib.Path(ikdsplit.__file__).parent / "database" / "wycksplit"
+    fd = src / f"{spg_sup:03d}_{spg_sub:03d}.toml"
+    with fd.open("rb") as f:
+        wycksplit = tomllib.load(f)
+    return wycksplit["basis_change"], wycksplit["origin_shift"]
