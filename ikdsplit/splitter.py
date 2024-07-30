@@ -4,7 +4,6 @@ import argparse
 import copy
 import math
 import pathlib
-import shutil
 import tomllib
 
 import pandas as pd
@@ -17,7 +16,7 @@ from ikdsplit.io import (
     write_config,
 )
 from ikdsplit.spacegroup import invert
-from ikdsplit.utils import cd, get_subgroups, format_df, print_group
+from ikdsplit.utils import cd, format_df, get_subgroups, print_group
 
 
 def update_config(superconfig: dict, spg_sup: int, spg_sub: int) -> dict:
