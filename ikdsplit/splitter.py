@@ -65,7 +65,7 @@ def recur_prepare(
             df = add_wyckoff(df, group)
             df = format_df(df)
             fn = "atoms_conventional.csv"
-            df.to_csv(fn, float_format="%24.18f", index=False)
+            df.to_csv(fn, float_format="%21.15f", index=False)
 
         config = update_config(superconfig, supergroup, group)
 
