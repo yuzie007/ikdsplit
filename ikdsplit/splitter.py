@@ -2,9 +2,7 @@
 
 import argparse
 import copy
-import math
 import pathlib
-import tomllib
 
 import pandas as pd
 
@@ -15,8 +13,18 @@ from ikdsplit.io import (
     parse_config,
     write_config,
 )
-from ikdsplit.spacegroup import invert
-from ikdsplit.utils import cd, format_df, get_subgroups, print_group
+from ikdsplit.spacegroup import (
+    find_crystal_class,
+    find_point_group_order,
+    invert,
+)
+from ikdsplit.utils import (
+    cd,
+    count_configurations,
+    format_df,
+    get_subgroups,
+    print_group,
+)
 
 
 def update_config(superconfig: dict, spg_sup: int, spg_sub: int) -> dict:
@@ -34,14 +42,6 @@ def update_config(superconfig: dict, spg_sup: int, spg_sub: int) -> dict:
     config["regress"]["transformations"].insert(0, op)
 
     return config
-
-
-def count_configurations() -> int:
-    """Count number of atomic configurations."""
-    with pathlib.Path("ikdsplit.toml").open("rb") as f:
-        config = tomllib.load(f)
-    df = pd.read_csv("atoms_conventional.csv", skipinitialspace=True)
-    return math.prod([len(config["fill"][_]) for _ in df["symbol"]])
 
 
 def recur_prepare(
@@ -71,6 +71,8 @@ def recur_prepare(
 
         write_config(config)
 
+        order = find_point_group_order(find_crystal_class(group))
+        print(f"(order: {order})", end=" ")
         print(f"({count_configurations()} configurations)")
 
         subgroups = get_subgroups(group)

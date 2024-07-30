@@ -8,7 +8,7 @@ from ikdsplit.io import make_default_config, parse_config
 from ikdsplit.regressor import regress
 from ikdsplit.sorter import sort_all
 from ikdsplit.spacegroup import find_crystal_class, find_point_group_order
-from ikdsplit.utils import cd, get_subgroups, print_group
+from ikdsplit.utils import cd, count_configurations, get_subgroups, print_group
 
 
 def recur_run(
@@ -22,10 +22,13 @@ def recur_run(
     """Run each subgroup recursively."""
     print_group(group, level, end=" ")
     order = find_point_group_order(find_crystal_class(group))
+    print(f"(order: {order})", end=" ")
+    print(f"({count_configurations()} configurations)", end=" ")
     if order < min_order:
-        print(f"(order: {order} ... skipped)")
+        print("... skipped")
         return
-    print(f"(order: {order})")
+    else:
+        print()
 
     dn = pathlib.Path(f"{group:03d}")
     dn.mkdir(parents=True, exist_ok=True)
