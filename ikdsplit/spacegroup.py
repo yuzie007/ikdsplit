@@ -369,6 +369,21 @@ def get_subgroups(supergroup: int) -> list[int]:
     return df[df["supergroup"] == supergroup]["subgroup"].to_numpy().tolist()
 
 
+def parse_transformation_csv(s: dict) -> tuple[np.ndarray, np.ndarray]:
+    """Parse transformation in the csv file."""
+    k0 = ["Pxx", "Pxy", "Pxz", "Pyx", "Pyy", "Pyz", "Pzx", "Pzy", "Pzz"]
+    k1 = ["px", "py", "pz"]
+    change_of_basis = np.fromiter(
+        (float(Fraction(s[_])) for _ in k0),
+        dtype=float,
+    ).reshape(3, 3)
+    origin_shift = np.fromiter(
+        (float(Fraction(s[_])) for _ in k1),
+        dtype=float,
+    )
+    return change_of_basis, origin_shift
+
+
 def fetch_transformation(
     supergroup: int | None,
     subgroup: int,
@@ -392,15 +407,5 @@ def fetch_transformation(
         return np.eye(3, dtype=int), np.zeros(3)
     df = get_transformations()
     df = df[(df["supergroup"] == supergroup) & (df["subgroup"] == subgroup)]
-    s = df.squeeze(axis=0)
-    k0 = ["Pxx", "Pxy", "Pxz", "Pyx", "Pyy", "Pyz", "Pzx", "Pzy", "Pzz"]
-    k1 = ["px", "py", "pz"]
-    change_of_basis = np.fromiter(
-        (float(Fraction(s[_])) for _ in k0),
-        dtype=float,
-    ).reshape(3, 3)
-    origin_shift = np.fromiter(
-        (float(Fraction(s[_])) for _ in k1),
-        dtype=float,
-    )
-    return change_of_basis, origin_shift
+    s = dict(df.squeeze(axis=0))
+    return parse_transformation_csv(s)
