@@ -15,6 +15,8 @@ from ikdsplit.spacegroup import get_setting_for_origin_choice_2
 def index_wyckoff(df: pd.DataFrame, space_group_number: int) -> pd.DataFrame:
     """Index each site."""
     key = f"wyckoff_{space_group_number:03d}"
+    if key not in df.columns:
+        key = "wyckoff"
     tmp = df.groupby([key]).cumcount() + 1
     df[key] += tmp.astype(str)
     return df
@@ -82,6 +84,8 @@ def make_images(
         d.update({symbol: atoms.symbols.count(symbol) for symbol in symbols})
 
         key = f"wyckoff_{spacegroup:03d}"
+        if key not in df.columns:
+            key = "wyckoff"
         d.update(dict(zip(df[key], filled, strict=True)))
 
         ds.append(d)

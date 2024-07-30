@@ -13,7 +13,7 @@ from ikdsplit.utils import cd
 def test_fill(data_path, tmp_path) -> None:
     """Test `fill`."""
     src = pathlib.Path(__file__).parent / "testdata" / data_path
-    fns = ["atoms_conventional.csv", "cell.dat", "ikdsplit.toml", "FPOSCAR"]
+    fns = ["atoms_conventional.csv", "ikdsplit.toml", "FPOSCAR"]
     for _ in fns:
         if (src / _).exists():
             shutil.copy2(src / _, tmp_path)
