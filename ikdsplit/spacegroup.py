@@ -3,6 +3,7 @@
 import collections
 import pathlib
 import re
+from fractions import Fraction
 
 import numpy as np
 import pandas as pd
@@ -340,3 +341,71 @@ def find_point_group_order(s: str) -> int:
         "-43m": 24,
         "m-3m": 48,
     }[s]
+
+
+def get_transformations() -> pd.DataFrame:
+    """Get transformations."""
+    src = pathlib.Path(ikdsplit.__file__).parent / "database"
+    subgroups_t = pd.read_csv(src / "transformations_t.csv")
+    subgroups_k = pd.read_csv(src / "transformations_k.csv")
+    return pd.concat([subgroups_t, subgroups_k])
+
+
+def get_subgroups(supergroup: int) -> list[int]:
+    """Get subgroup numbers of the given space group number.
+
+    Parameters
+    ----------
+    supergroup : int
+        Space group number.
+
+    Returns
+    -------
+    list[int]
+        List of the numbers of subgroup.
+
+    """
+    df = get_transformations()
+    return df[df["supergroup"] == supergroup]["subgroup"].to_numpy().tolist()
+
+
+def parse_transformation_csv(s: dict) -> tuple[np.ndarray, np.ndarray]:
+    """Parse transformation in the csv file."""
+    k0 = ["Pxx", "Pxy", "Pxz", "Pyx", "Pyy", "Pyz", "Pzx", "Pzy", "Pzz"]
+    k1 = ["px", "py", "pz"]
+    change_of_basis = np.fromiter(
+        (float(Fraction(s[_])) for _ in k0),
+        dtype=float,
+    ).reshape(3, 3)
+    origin_shift = np.fromiter(
+        (float(Fraction(s[_])) for _ in k1),
+        dtype=float,
+    )
+    return change_of_basis, origin_shift
+
+
+def fetch_transformation(
+    supergroup: int | None,
+    subgroup: int,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Fetch transformation of coordinates.
+
+    Parameters
+    ----------
+    supergroup : int | None
+        Space group number of supergroup.
+    subgroup : int
+        Space group number of subgroup.
+
+    Returns
+    -------
+    tuple[np.ndarray, np.ndarray]
+        Change of the basis and origin shift.
+
+    """
+    if supergroup is None:
+        return np.eye(3, dtype=int), np.zeros(3)
+    df = get_transformations()
+    df = df[(df["supergroup"] == supergroup) & (df["subgroup"] == subgroup)]
+    s = dict(df.squeeze(axis=0))
+    return parse_transformation_csv(s)

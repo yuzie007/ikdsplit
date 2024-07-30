@@ -1,2 +1,2 @@
+include ikdsplit/database/*.csv
 include ikdsplit/database/wyckoff/*.csv
-include ikdsplit/database/wycksplit/*.yaml
