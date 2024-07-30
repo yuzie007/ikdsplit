@@ -1,8 +1,10 @@
 """Utilities."""
 
 import contextlib
+import math
 import os
 import pathlib
+import tomllib
 import typing
 
 import pandas as pd
@@ -79,3 +81,11 @@ def print_group(group: int, level: int, *args: tuple, **kwargs: dict) -> None:
         s += "-> "
     s += f"{group:03d}"
     print(s, *args, **kwargs)
+
+
+def count_configurations() -> int:
+    """Count number of atomic configurations."""
+    with pathlib.Path("ikdsplit.toml").open("rb") as f:
+        config = tomllib.load(f)
+    df = pd.read_csv("atoms_conventional.csv", skipinitialspace=True)
+    return math.prod([len(config["fill"][_]) for _ in df["symbol"]])
