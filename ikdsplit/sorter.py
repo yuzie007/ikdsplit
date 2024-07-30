@@ -19,11 +19,13 @@ def sort_atoms(atoms: Atoms, atoms_ref: Atoms) -> Atoms:
         Atoms with the reference order.
 
     """
+    scaled_positions_ref = atoms_ref.get_scaled_positions()
+    scaled_positions = atoms.get_scaled_positions()
+
     symprec = 1e-12
     tmp = []
     for i in range(len(atoms)):
-        sp_ref = atoms.get_scaled_positions()[i]
-        diffs = atoms_ref.get_scaled_positions() - sp_ref
+        diffs = scaled_positions[i] - scaled_positions_ref
         diffs -= np.round(diffs)
         indices = np.where(np.all(np.abs(diffs) < symprec, axis=1))[0]
         assert len(indices) in [0, 1]
