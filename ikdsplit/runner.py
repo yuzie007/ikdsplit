@@ -16,15 +16,15 @@ def recur_run(
     supergroup: int,
     group: int,
     level: int,
-    max_level: int,
-    min_order: int,
+    criteria: dict[str, int],
 ) -> None:
     """Run each subgroup recursively."""
     print_group(group, level, end=" ")
     order = find_point_group_order(find_crystal_class(group))
     print(f"(order: {order})", end=" ")
-    print(f"({count_configurations()} configurations)", end=" ")
-    if order < min_order:
+    ncs = count_configurations()
+    print(f"({ncs} configurations)", end=" ")
+    if order < criteria["min_order"] or ncs > criteria["max_configurations"]:
         print("... skipped")
         return
     else:
@@ -40,28 +40,32 @@ def recur_run(
         d = config["sort"]
         sort_all(d["reference"])
 
-        if 0 < max_level <= level:
+        if 0 < criteria["max_level"] <= level:
             return
 
         subgroups = get_subgroups(group)
         for subgroup in subgroups:
-            recur_run(config, group, subgroup, level + 1, max_level, min_order)
+            recur_run(config, group, subgroup, level + 1, criteria)
 
 
-def start(max_level: int = 1, min_order: int = 4) -> None:
+def get_default_criteria() -> dict[str, int]:
+    """Get default criteria."""
+    return {
+        "max_level": 1,
+        "min_order": 4,
+        "max_configurations": 2**12,  # 4096
+    }
+
+
+def start(criteria: dict[str, int]) -> None:
     """Start calculations."""
     config = make_default_config()
     config.update(parse_config())
 
+    criteria = get_default_criteria() | criteria
+
     print("run ...")
-    recur_run(
-        config,
-        None,
-        config["space_group_number"],
-        0,
-        max_level,
-        min_order,
-    )
+    recur_run(config, None, config["space_group_number"], 0, criteria)
     print()
 
 
@@ -84,8 +88,20 @@ def add_arguments(parser: argparse.ArgumentParser) -> None:
         type=int,
         help="minimum order of space group to be checked",
     )
+    parser.add_argument(
+        "-c",
+        "--configurations",
+        default=2**12,  # 4096
+        type=int,
+        help="maximum configurations to be checked",
+    )
 
 
 def run(args: argparse.Namespace) -> None:
     """Run."""
-    start(args.level, args.order)
+    criteria = {
+        "max_level": args.level,
+        "min_order": args.order,
+        "max_configurations": args.configurations,
+    }
+    start(criteria)
