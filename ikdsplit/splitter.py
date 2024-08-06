@@ -84,7 +84,7 @@ def get_default_criteria() -> dict[str, int]:
     return {
         "max_level": 0,
         "min_order": 4,
-        "max_configurations": 2**12,  # 4096
+        "max_configurations": 2**10,  # 1024
     }
 
 
@@ -122,7 +122,7 @@ def add_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "-c",
         "--configurations",
-        default=2**12,  # 4096
+        default=2**10,  # 1024
         type=int,
         help="maximum configurations to be checked",
     )
