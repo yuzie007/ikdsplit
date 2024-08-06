@@ -66,7 +66,7 @@ def make_images(
         df_included["symbol"] = filled
         atoms = make_atoms(df_included, spacegroup, cell, primitive=primitive)
 
-        fn = f"PPOSCAR-{i:09d}" if primitive else f"CPOSCAR-{i:09d}"
+        fn = f"PPOSCAR-{i:06d}" if primitive else f"CPOSCAR-{i:06d}"
         atoms.write(fn, direct=True)
 
         d = {}

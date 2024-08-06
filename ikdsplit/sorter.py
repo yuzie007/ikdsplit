@@ -55,8 +55,8 @@ def sort_all(reference: str | None) -> None:
     df = pd.read_csv("info_conventional.csv", skipinitialspace=True)
     for d in df.to_dict(orient="records"):
         index = d["configuration"]
-        fin = f"RPOSCAR-{index:09d}"
-        fout = f"SPOSCAR-{index:09d}"
+        fin = f"RPOSCAR-{index:06d}"
+        fout = f"SPOSCAR-{index:06d}"
         if reference is not None:
             atoms = ase.io.read(fin)
             atoms = sort_atoms(atoms, atoms_ref)

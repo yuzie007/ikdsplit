@@ -78,8 +78,8 @@ def regress() -> None:
     ds = []
     for d in df.to_dict(orient="records"):
         index = d["configuration"]
-        fin = f"PPOSCAR-{index:09d}"
-        fout = f"RPOSCAR-{index:09d}"
+        fin = f"PPOSCAR-{index:06d}"
+        fout = f"RPOSCAR-{index:06d}"
         atoms = ase.io.read(fin)
         atoms = change_coordinates(atoms, basis_change, origin_shift)
         atoms.write(fout, direct=True)
