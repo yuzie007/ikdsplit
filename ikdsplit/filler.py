@@ -36,24 +36,15 @@ def make_atoms(
     included = df["symbol"] != "X"  # remove vacancies
     symbols = df[included]["symbol"].str.strip().to_numpy()
     basis = df[included][["x", "y", "z"]]
-    try:
-        atoms = crystal(
-            symbols,
-            basis=basis,
-            spacegroup=spacegroup,
-            cell=cell,
-            setting=setting,
-            primitive_cell=primitive,
-        )
-    except Exception:
-        atoms = crystal(
-            symbols,
-            basis=basis,
-            spacegroup=spacegroup,
-            cell=cell,
-            primitive_cell=primitive,
-        )
-    return atoms
+
+    return crystal(
+        symbols,
+        basis=basis,
+        spacegroup=spacegroup,
+        cell=cell,
+        setting=setting,
+        primitive_cell=primitive,
+    )
 
 
 def make_images(

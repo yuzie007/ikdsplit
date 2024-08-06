@@ -109,3 +109,16 @@ def run(args: argparse.Namespace) -> None:
         "max_configurations": args.configurations,
     }
     start(criteria)
+
+
+def main() -> None:
+    """Run as a script."""
+    formatter_class = argparse.ArgumentDefaultsHelpFormatter
+    parser = argparse.ArgumentParser(formatter_class=formatter_class)
+    add_arguments(parser)
+    args = parser.parse_args()
+    run(args)
+
+
+if __name__ == "__main__":
+    main()
