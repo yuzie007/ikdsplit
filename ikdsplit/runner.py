@@ -24,19 +24,22 @@ def recur_run(
 ) -> None:
     """Run each subgroup recursively."""
     print_group(group, level, end=" ")
-    order = find_point_group_order(find_crystal_class(group))
-    print(f"(order: {order})", end=" ")
-    ncs = count_configurations()
-    print(f"({ncs} configurations)", end=" ")
-    if order < criteria["min_order"] or ncs > criteria["max_configurations"]:
-        print("... skipped")
-        return
-    else:
-        print()
 
     dn = pathlib.Path(f"{group:03d}")
     dn.mkdir(parents=True, exist_ok=True)
     with cd(dn):
+        order = find_point_group_order(find_crystal_class(group))
+        print(f"(order: {order})", end=" ")
+        ncs = count_configurations()
+        print(f"({ncs} configurations)", end=" ")
+        if order < criteria["min_order"]:
+            print("... skipped")
+            return
+        if ncs > criteria["max_configurations"]:
+            print("... skipped")
+            return
+        print()
+
         fill()
 
         regress()
