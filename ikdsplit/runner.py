@@ -12,6 +12,7 @@ from ikdsplit.spacegroup import (
     find_point_group_order,
     get_subgroups,
 )
+from ikdsplit.splitter import add_arguments, get_default_criteria
 from ikdsplit.utils import cd, count_configurations, print_group
 
 
@@ -55,15 +56,6 @@ def recur_run(
             recur_run(config, group, subgroup, level + 1, criteria)
 
 
-def get_default_criteria() -> dict[str, int]:
-    """Get default criteria."""
-    return {
-        "max_level": 1,
-        "min_order": 4,
-        "max_configurations": 2**12,  # 4096
-    }
-
-
 def start(criteria: dict[str, int]) -> None:
     """Start calculations."""
     config = make_default_config()
@@ -74,34 +66,6 @@ def start(criteria: dict[str, int]) -> None:
     print("run ...")
     recur_run(config, None, config["space_group_number"], 0, criteria)
     print()
-
-
-def add_arguments(parser: argparse.ArgumentParser) -> None:
-    """Add arguments."""
-    parser.add_argument(
-        "-l",
-        "--level",
-        default=0,
-        type=int,
-        help=(
-            "level up to which maximal subgroups are checked "
-            "(default (0): all levels are checked)"
-        ),
-    )
-    parser.add_argument(
-        "-o",
-        "--order",
-        default=4,
-        type=int,
-        help="minimum order of space group to be checked",
-    )
-    parser.add_argument(
-        "-c",
-        "--configurations",
-        default=2**12,  # 4096
-        type=int,
-        help="maximum configurations to be checked",
-    )
 
 
 def run(args: argparse.Namespace) -> None:
