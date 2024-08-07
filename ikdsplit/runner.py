@@ -7,13 +7,13 @@ from ikdsplit.filler import fill
 from ikdsplit.io import make_default_config, parse_config
 from ikdsplit.regressor import regress
 from ikdsplit.sorter import sort_all
-from ikdsplit.spacegroup import (
-    find_crystal_class,
-    find_point_group_order,
-    get_subgroups,
+from ikdsplit.spacegroup import get_subgroups
+from ikdsplit.splitter import (
+    add_arguments,
+    check_criteria,
+    get_default_criteria,
 )
-from ikdsplit.splitter import add_arguments, get_default_criteria
-from ikdsplit.utils import cd, count_configurations, print_group
+from ikdsplit.utils import cd, print_group
 
 
 def recur_run(
@@ -29,17 +29,8 @@ def recur_run(
     dn = pathlib.Path(f"{group:03d}")
     dn.mkdir(parents=True, exist_ok=True)
     with cd(dn):
-        order = find_point_group_order(find_crystal_class(group))
-        print(f"(order: {order})", end=" ")
-        ncs = count_configurations()
-        print(f"({ncs} configurations)", end=" ")
-        if order < criteria["min_order"]:
-            print("... skipped")
+        if not check_criteria(group, criteria):
             return
-        if ncs > criteria["max_configurations"]:
-            print("... skipped")
-            return
-        print()
 
         fill()
 

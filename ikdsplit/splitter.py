@@ -35,6 +35,33 @@ def update_config(superconfig: dict, spg_sup: int, spg_sub: int) -> dict:
     return config
 
 
+def check_criteria(group: int, criteria: dict[str, int]) -> bool:
+    """Check if we continue to subgroups.
+
+    Parameters
+    ----------
+    group : int
+        Space group number.
+    criteria : dict[str, int]
+        Criteria.
+
+    Returns
+    -------
+    bool
+        If we continue to subgroups.
+
+    """
+    order = find_point_group_order(find_crystal_class(group))
+    print(f"(order: {order})", end=" ")
+    ncs = count_configurations()
+    print(f"({ncs} configurations)", end=" ")
+    if order < criteria["min_order"] or ncs > criteria["max_configurations"]:
+        print("... skipped")
+        return False
+    print()
+    return True
+
+
 def recur_prepare(
     superconfig: dict,
     supergroup: int,
@@ -62,17 +89,8 @@ def recur_prepare(
 
         write_config(config)
 
-        order = find_point_group_order(find_crystal_class(group))
-        print(f"(order: {order})", end=" ")
-        ncs = count_configurations()
-        print(f"({ncs} configurations)", end=" ")
-        if order < criteria["min_order"]:
-            print("... skipped")
+        if not check_criteria(group, criteria):
             return
-        if ncs > criteria["max_configurations"]:
-            print("... skipped")
-            return
-        print()
 
         subgroups = get_subgroups(group)
         for subgroup in subgroups:
