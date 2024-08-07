@@ -78,8 +78,9 @@ def write_config(config: dict) -> None:
                 f.write(f"{k} = {r}\n")
         f.write("\n")
 
-        if "sort" in config:
-            f.write("[sort]\n")
-            for k, v in config["sort"].items():
-                r = repr(v)
-                f.write(f"{k} = {r}\n")
+        f.write("[sort]\n")
+        for k, v in config["sort"].items():
+            if v is None:
+                continue
+            r = repr(v)
+            f.write(f"{k} = {r}\n")
