@@ -58,7 +58,6 @@ def check_criteria(group: int, criteria: dict[str, int]) -> bool:
     if order < criteria["min_order"] or ncs > criteria["max_configurations"]:
         print("... skipped")
         return False
-    print()
     return True
 
 
@@ -91,6 +90,7 @@ def recur_prepare(
 
         if not check_criteria(group, criteria):
             return
+        print()
 
         subgroups = get_subgroups(group)
         for subgroup in subgroups:

@@ -27,6 +27,7 @@ def run_recursive(
             return
 
         fun()
+        print()
 
         if 0 < criteria["max_level"] <= level:
             return

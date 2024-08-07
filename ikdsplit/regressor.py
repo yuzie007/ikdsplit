@@ -67,6 +67,9 @@ def cumulate_coordinate_change() -> tuple[np.ndarray, np.ndarray]:
 def regress() -> None:
     """Regress to the original target supercell."""
     basis_change, origin_shift = cumulate_coordinate_change()
+    if not np.allclose(basis_change, np.rint(basis_change)):
+        print("regressed cell not compatible ... skipped", end=" ")
+        return
 
     # calculate atomic positions in the target supercell
     df = pd.read_csv("atoms_conventional.csv", skipinitialspace=True)
