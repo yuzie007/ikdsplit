@@ -22,4 +22,6 @@ def test_run(data_path: str, tmp_path) -> None:
 
     with cd(tmp_path):
         assert subprocess.call(["ikdsplit", "split"]) == 0
-        assert subprocess.call(["ikdsplit", "run", "-l", str(level)]) == 0
+        assert subprocess.call(["ikdsplit", "fill", "-l", str(level)]) == 0
+        assert subprocess.call(["ikdsplit", "regress", "-l", str(level)]) == 0
+        assert subprocess.call(["ikdsplit", "sort", "-l", str(level)]) == 0
