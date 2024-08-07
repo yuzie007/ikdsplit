@@ -88,7 +88,10 @@ def run(args: argparse.Namespace) -> None:
         "min_order": args.order,
         "max_configurations": args.configurations,
     }
-    start_recursive(sort, criteria)
+    if args.recursive:
+        start_recursive(sort, criteria)
+    else:
+        sort()
 
 
 def main() -> None:

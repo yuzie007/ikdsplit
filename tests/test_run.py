@@ -20,8 +20,12 @@ def test_run(data_path: str, tmp_path) -> None:
         if (src / _).exists():
             shutil.copy2(src / _, tmp_path)
 
+    commands = [
+        ["ikdsplit", "split", "-r"],
+        ["ikdsplit", "fill", "-r", "-l", str(level)],
+        ["ikdsplit", "regress", "-r", "-l", str(level)],
+        ["ikdsplit", "sort", "-r", "-l", str(level)],
+    ]
     with cd(tmp_path):
-        assert subprocess.call(["ikdsplit", "split"]) == 0
-        assert subprocess.call(["ikdsplit", "fill", "-l", str(level)]) == 0
-        assert subprocess.call(["ikdsplit", "regress", "-l", str(level)]) == 0
-        assert subprocess.call(["ikdsplit", "sort", "-l", str(level)]) == 0
+        for command in commands:
+            assert subprocess.call(command) == 0

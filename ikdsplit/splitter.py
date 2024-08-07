@@ -144,6 +144,12 @@ def add_arguments(parser: argparse.ArgumentParser) -> None:
         type=int,
         help="maximum configurations to be checked",
     )
+    parser.add_argument(
+        "-r",
+        "--recursive",
+        action="store_true",
+        help="run recursively",
+    )
 
 
 def run(args: argparse.Namespace) -> None:
