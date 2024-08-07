@@ -13,7 +13,9 @@ from ase.build import make_supercell
 from ase.spacegroup.crystal_data import _lattice_centering
 
 from ikdsplit.io import parse_config
+from ikdsplit.runner import start_recursive
 from ikdsplit.spacegroup import multiply
+from ikdsplit.splitter import add_arguments
 from ikdsplit.utils import format_df
 
 
@@ -89,10 +91,24 @@ def regress() -> None:
     df.to_csv("info_regressed.csv", index=False)
 
 
-def add_arguments(parser: argparse.ArgumentParser) -> None:
-    """Add arguments."""
-
-
 def run(args: argparse.Namespace) -> None:
     """Run."""
-    regress()
+    criteria = {
+        "max_level": args.level,
+        "min_order": args.order,
+        "max_configurations": args.configurations,
+    }
+    start_recursive(regress, criteria)
+
+
+def main() -> None:
+    """Run as a script."""
+    formatter_class = argparse.ArgumentDefaultsHelpFormatter
+    parser = argparse.ArgumentParser(formatter_class=formatter_class)
+    add_arguments(parser)
+    args = parser.parse_args()
+    run(args)
+
+
+if __name__ == "__main__":
+    main()

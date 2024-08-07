@@ -9,7 +9,9 @@ from ase import Atoms
 from ase.spacegroup import crystal, get_spacegroup
 
 from ikdsplit.io import parse_config
+from ikdsplit.runner import start_recursive
 from ikdsplit.spacegroup import get_setting_for_origin_choice_2
+from ikdsplit.splitter import add_arguments
 
 
 def index_wyckoff(df: pd.DataFrame, space_group_number: int) -> pd.DataFrame:
@@ -103,10 +105,24 @@ def fill() -> None:
         info.to_csv(fn, index=False)
 
 
-def add_arguments(parser: argparse.ArgumentParser) -> None:
-    """Add arguments."""
-
-
 def run(args: argparse.Namespace) -> None:
     """Run."""
-    fill()
+    criteria = {
+        "max_level": args.level,
+        "min_order": args.order,
+        "max_configurations": args.configurations,
+    }
+    start_recursive(fill, criteria)
+
+
+def main() -> None:
+    """Run as a script."""
+    formatter_class = argparse.ArgumentDefaultsHelpFormatter
+    parser = argparse.ArgumentParser(formatter_class=formatter_class)
+    add_arguments(parser)
+    args = parser.parse_args()
+    run(args)
+
+
+if __name__ == "__main__":
+    main()
