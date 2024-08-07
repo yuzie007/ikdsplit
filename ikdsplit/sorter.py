@@ -71,12 +71,14 @@ def sort() -> None:
         index = d["configuration"]
         fin = f"RPOSCAR-{index:06d}"
         fout = f"SPOSCAR-{index:06d}"
-        if reference is not None:
+        if not pathlib.Path(fin).is_file():
+            continue
+        if reference is None:
+            shutil.copy2(fin, fout)
+        else:
             atoms = ase.io.read(fin)
             atoms = sort_atoms(atoms, atoms_ref)
             atoms.write(fout, direct=True)
-        else:
-            shutil.copy2(fin, fout)
 
 
 def run(args: argparse.Namespace) -> None:
