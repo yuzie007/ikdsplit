@@ -17,5 +17,6 @@ def test_fill(data_path, tmp_path) -> None:
     for _ in fns:
         if (src / _).exists():
             shutil.copy2(src / _, tmp_path)
+
     with cd(tmp_path):
         assert subprocess.call(["ikdsplit", "fill"]) == 0

@@ -13,7 +13,9 @@ from ase.build import make_supercell
 from ase.spacegroup.crystal_data import _lattice_centering
 
 from ikdsplit.io import parse_config
+from ikdsplit.runner import start_recursive
 from ikdsplit.spacegroup import multiply
+from ikdsplit.splitter import add_arguments
 from ikdsplit.utils import format_df
 
 
@@ -65,6 +67,9 @@ def cumulate_coordinate_change() -> tuple[np.ndarray, np.ndarray]:
 def regress() -> None:
     """Regress to the original target supercell."""
     basis_change, origin_shift = cumulate_coordinate_change()
+    if not np.allclose(basis_change, np.rint(basis_change)):
+        print("regressed cell not compatible ... skipped", end=" ")
+        return
 
     # calculate atomic positions in the target supercell
     df = pd.read_csv("atoms_conventional.csv", skipinitialspace=True)
@@ -78,8 +83,8 @@ def regress() -> None:
     ds = []
     for d in df.to_dict(orient="records"):
         index = d["configuration"]
-        fin = f"PPOSCAR-{index:09d}"
-        fout = f"RPOSCAR-{index:09d}"
+        fin = f"PPOSCAR-{index:06d}"
+        fout = f"RPOSCAR-{index:06d}"
         atoms = ase.io.read(fin)
         atoms = change_coordinates(atoms, basis_change, origin_shift)
         atoms.write(fout, direct=True)
@@ -89,10 +94,27 @@ def regress() -> None:
     df.to_csv("info_regressed.csv", index=False)
 
 
-def add_arguments(parser: argparse.ArgumentParser) -> None:
-    """Add arguments."""
-
-
 def run(args: argparse.Namespace) -> None:
     """Run."""
-    regress()
+    criteria = {
+        "max_level": args.level,
+        "min_order": args.order,
+        "max_configurations": args.configurations,
+    }
+    if args.recursive:
+        start_recursive(regress, criteria)
+    else:
+        regress()
+
+
+def main() -> None:
+    """Run as a script."""
+    formatter_class = argparse.ArgumentDefaultsHelpFormatter
+    parser = argparse.ArgumentParser(formatter_class=formatter_class)
+    add_arguments(parser)
+    args = parser.parse_args()
+    run(args)
+
+
+if __name__ == "__main__":
+    main()

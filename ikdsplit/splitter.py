@@ -35,12 +35,38 @@ def update_config(superconfig: dict, spg_sup: int, spg_sub: int) -> dict:
     return config
 
 
+def check_criteria(group: int, criteria: dict[str, int]) -> bool:
+    """Check if we continue to subgroups.
+
+    Parameters
+    ----------
+    group : int
+        Space group number.
+    criteria : dict[str, int]
+        Criteria.
+
+    Returns
+    -------
+    bool
+        If we continue to subgroups.
+
+    """
+    order = find_point_group_order(find_crystal_class(group))
+    print(f"(order: {order})", end=" ")
+    ncs = count_configurations()
+    print(f"({ncs} configurations)", end=" ")
+    if order < criteria["min_order"] or ncs > criteria["max_configurations"]:
+        print("... skipped")
+        return False
+    return True
+
+
 def recur_prepare(
     superconfig: dict,
     supergroup: int,
     group: int,
     level: int,
-    max_level: int,
+    criteria: dict[str, int],
 ) -> None:
     """Prepare each subgroup recursively."""
     print_group(group, level, end=" ")
@@ -62,23 +88,33 @@ def recur_prepare(
 
         write_config(config)
 
-        order = find_point_group_order(find_crystal_class(group))
-        print(f"(order: {order})", end=" ")
-        ncs = count_configurations()
-        print(f"({ncs} configurations)")
+        if not check_criteria(group, criteria):
+            return
+        print()
 
         subgroups = get_subgroups(group)
         for subgroup in subgroups:
-            recur_prepare(config, group, subgroup, level + 1, max_level)
+            recur_prepare(config, group, subgroup, level + 1, criteria)
 
 
-def start(max_level: int = 1) -> None:
+def get_default_criteria() -> dict[str, int]:
+    """Get default criteria."""
+    return {
+        "max_level": 0,
+        "min_order": 4,
+        "max_configurations": 2**10,  # 1024
+    }
+
+
+def start(criteria: dict[str, int]) -> None:
     """Start calculations."""
     config = make_default_config()
     config.update(parse_config())
 
+    criteria = get_default_criteria() | criteria
+
     print("prepare ...")
-    recur_prepare(config, None, config["space_group_number"], 0, max_level)
+    recur_prepare(config, None, config["space_group_number"], 0, criteria)
     print()
 
 
@@ -87,12 +123,53 @@ def add_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "-l",
         "--level",
-        default=1,
+        default=0,
         type=int,
-        help="level up to which maximal subgroups are checked",
+        help=(
+            "level up to which maximal subgroups are checked "
+            "(default (0): all levels are checked)"
+        ),
+    )
+    parser.add_argument(
+        "-o",
+        "--order",
+        default=4,
+        type=int,
+        help="minimum order of space group to be checked",
+    )
+    parser.add_argument(
+        "-c",
+        "--configurations",
+        default=2**10,  # 1024
+        type=int,
+        help="maximum configurations to be checked",
+    )
+    parser.add_argument(
+        "-r",
+        "--recursive",
+        action="store_true",
+        help="run recursively",
     )
 
 
 def run(args: argparse.Namespace) -> None:
     """Run."""
-    start(args.level)
+    criteria = {
+        "max_level": args.level,
+        "min_order": args.order,
+        "max_configurations": args.configurations,
+    }
+    start(criteria)
+
+
+def main() -> None:
+    """Run as a script."""
+    formatter_class = argparse.ArgumentDefaultsHelpFormatter
+    parser = argparse.ArgumentParser(formatter_class=formatter_class)
+    add_arguments(parser)
+    args = parser.parse_args()
+    run(args)
+
+
+if __name__ == "__main__":
+    main()

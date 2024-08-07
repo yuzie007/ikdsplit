@@ -1,11 +1,32 @@
 """Sort atoms."""
 
+import argparse
+import pathlib
 import shutil
+import tomllib
 
 import ase.io
 import numpy as np
 import pandas as pd
 from ase import Atoms
+
+from ikdsplit.runner import start_recursive
+from ikdsplit.splitter import add_arguments
+
+
+def get_reference() -> str:
+    """Get reference.
+
+    Parameters
+    ----------
+    reference : str | None, default = None
+        Atoms with the reference positions.
+        If None, each file is simply copied.
+
+    """
+    with pathlib.Path("ikdsplit.toml").open("rb") as f:
+        config = tomllib.load(f)
+    return config["sort"]["reference"]
 
 
 def sort_atoms(atoms: Atoms, atoms_ref: Atoms) -> Atoms:
@@ -36,41 +57,51 @@ def sort_atoms(atoms: Atoms, atoms_ref: Atoms) -> Atoms:
     return atoms_ref[tmp]
 
 
-def sort_all(reference: str | None) -> None:
+def sort() -> None:
     """Sort atoms in the order in the reference file.
 
     Only `scaled_positions` are referred to, and `cell` is kept.
 
     Original atomic positions should be stored in `SPOSCAR_regressed`.
-
-    Parameters
-    ----------
-    reference : str | None, default = None
-        Atoms with the reference positions.
-        If None, each file is simply copied.
-
     """
-    if reference is not None:
-        atoms_ref = ase.io.read(reference)
+    reference = get_reference()
+    atoms_ref = ase.io.read(reference)
     df = pd.read_csv("info_conventional.csv", skipinitialspace=True)
     for d in df.to_dict(orient="records"):
         index = d["configuration"]
-        fin = f"RPOSCAR-{index:09d}"
-        fout = f"SPOSCAR-{index:09d}"
-        if reference is not None:
+        fin = f"RPOSCAR-{index:06d}"
+        fout = f"SPOSCAR-{index:06d}"
+        if not pathlib.Path(fin).is_file():
+            continue
+        if reference is None:
+            shutil.copy2(fin, fout)
+        else:
             atoms = ase.io.read(fin)
             atoms = sort_atoms(atoms, atoms_ref)
             atoms.write(fout, direct=True)
-        else:
-            shutil.copy2(fin, fout)
 
 
-def add_arguments(parser):
-    parser.add_argument(
-        "--reference",
-        help="reference atoms with the reference order",
-    )
+def run(args: argparse.Namespace) -> None:
+    """Run."""
+    criteria = {
+        "max_level": args.level,
+        "min_order": args.order,
+        "max_configurations": args.configurations,
+    }
+    if args.recursive:
+        start_recursive(sort, criteria)
+    else:
+        sort()
 
 
-def run(args):
-    sort_all(args.reference)
+def main() -> None:
+    """Run as a script."""
+    formatter_class = argparse.ArgumentDefaultsHelpFormatter
+    parser = argparse.ArgumentParser(formatter_class=formatter_class)
+    add_arguments(parser)
+    args = parser.parse_args()
+    run(args)
+
+
+if __name__ == "__main__":
+    main()

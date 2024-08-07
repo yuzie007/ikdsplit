@@ -33,9 +33,13 @@ def parse_config() -> dict:
 
     config["cell"] = _parse_cell(config["cell"])
 
-    if "sort" in config and config["sort"]["reference"] is not None:
+    if (
+        "sort" in config
+        and "reference" in config["sort"]
+        and config["sort"]["reference"] is not None
+    ):
         path = pathlib.Path(config["sort"]["reference"])
-        config["sort"]["reference"] = path.resolve()
+        config["sort"]["reference"] = path.resolve().absolute().as_posix()
 
     return config
 
@@ -72,3 +76,11 @@ def write_config(config: dict) -> None:
             for k, v in transformation.items():
                 r = repr(v)
                 f.write(f"{k} = {r}\n")
+        f.write("\n")
+
+        f.write("[sort]\n")
+        for k, v in config["sort"].items():
+            if v is None:
+                continue
+            r = repr(v)
+            f.write(f"{k} = {r}\n")
